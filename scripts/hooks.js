@@ -1,5 +1,5 @@
-import CONSTANTS from "./constants";
-import { createDependentRegion } from "./helpers";
+import CONSTANTS from "./constants.js";
+import { createDependentRegion } from "./helpers.js";
 
 export default function registerHooks() {
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {

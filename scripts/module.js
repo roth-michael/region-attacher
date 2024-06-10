@@ -1,4 +1,4 @@
-import registerHooks from "./hooks";
+import registerHooks from "./hooks.js";
 
 Hooks.once('init', async function() {
     registerHooks();

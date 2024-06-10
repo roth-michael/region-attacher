@@ -1,4 +1,4 @@
-import CONSTANTS from "./constants";
+import CONSTANTS from "./constants.js";
 
 export async function createDependentRegion(templateDoc) {
     let origShape = templateDoc.object.shape;
