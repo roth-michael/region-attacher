@@ -4,6 +4,7 @@ const CONSTANTS = {
     FLAGS: {
         ATTACHED_TEMPLATE: 'attachedTemplate',
         ATTACHED_REGION: 'attachedRegion',
+        ATTACH_REGION_TO_TEMPLATE: 'attachRegionToTemplate',
     },
 };
 

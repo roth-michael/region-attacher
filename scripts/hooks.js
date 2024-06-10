@@ -5,7 +5,7 @@ export default function registerHooks() {
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         let originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
         if (!originItem) return;
-        // TODO: check if item is set to enable region attaching
+        if (!(foundry.utils.getProperty(originItem, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) return;
         await createDependentRegion(templateDoc);
     });
 

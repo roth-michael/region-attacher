@@ -1,1 +1,6 @@
-{}
+{
+    "REGION-ATTACHER": {
+        "RegionAttacher": "Region Attacher",
+        "AttachRegionToTemplate": "Attach Region to Template"
+    }
+}
