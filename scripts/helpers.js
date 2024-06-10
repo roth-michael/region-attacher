@@ -1,4 +1,4 @@
-import CONSTANTS from "./constants.js";
+import CONSTANTS from './constants.js';
 
 export async function createDependentRegion(templateDoc) {
     let origShape = templateDoc.object.shape ?? templateDoc.object._computeShape();
@@ -8,7 +8,7 @@ export async function createDependentRegion(templateDoc) {
         type: 'polygon',
         points: points
     }
-    let testRegionArr = await canvas.scene.createEmbeddedDocuments("Region", [{
+    let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
         name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
         shapes: [shape],
         visibility: 1 // TODO: have as an option

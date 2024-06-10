@@ -1,5 +1,5 @@
-import CONSTANTS from "./constants.js";
-import { createDependentRegion, getFullFlagPath } from "./helpers.js";
+import CONSTANTS from './constants.js';
+import { createDependentRegion, getFullFlagPath } from './helpers.js';
 
 export default function registerHooks() {
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {

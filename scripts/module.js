@@ -1,5 +1,5 @@
-import registerHooks from "./hooks.js";
-import registerSheetOverrides from "./sheet-overrides.js";
+import registerHooks from './hooks.js';
+import registerSheetOverrides from './sheet-overrides.js';
 
 Hooks.once('init', async function() {
     registerHooks();
