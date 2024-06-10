@@ -47,6 +47,9 @@ env:
   # processed by this workflow.
   release_module_url: "https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip"
 
+  ## The URL to the changelog for the most recent release
+  changelog_url: "https://github.com/${{github.repository}}/releases/tag/${{github.event.release.tag_name}}"
+
 
 on:
   # Only run this workflow when a release is published.
@@ -101,6 +104,7 @@ jobs:
           URL: ${{ env.project_url }}
           MANIFEST: ${{ env.latest_manifest_url }}
           DOWNLOAD: ${{ env.release_module_url }}
+          CHANGELOG: ${{ env.changelog_url }}
 
 
       # Create a "module.zip" archive containing all the module's required files.
