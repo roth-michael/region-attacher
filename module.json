@@ -28,10 +28,7 @@
     "requires": []
   },
   "esmodules": [
-    "scripts/module.js",
-    "scripts/constants.js",
-    "scripts/helpers.js",
-    "scripts/hooks.js"
+    "scripts/module.js"
   ],
   "styles": [
     "styles/module.css"
