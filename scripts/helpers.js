@@ -18,3 +18,7 @@ export async function createDependentRegion(templateDoc) {
     await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION, testRegion.uuid);
     return testRegion;
 }
+
+export function getFullFlagPath(flag) {
+    return `flags.${CONSTANTS.MODULE_NAME}.${flag}`;
+}

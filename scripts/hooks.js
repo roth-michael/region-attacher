@@ -1,11 +1,11 @@
 import CONSTANTS from "./constants.js";
-import { createDependentRegion } from "./helpers.js";
+import { createDependentRegion, getFullFlagPath } from "./helpers.js";
 
 export default function registerHooks() {
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         let originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
         if (!originItem) return;
-        if (!(foundry.utils.getProperty(originItem, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) return;
+        if (!(originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) return;
         await createDependentRegion(templateDoc);
     });
 
@@ -21,7 +21,7 @@ export default function registerHooks() {
         }
         await region.update({
             'shapes': [newShape],
-            [`flags.${CONSTANTS.MODULE_NAME}.${CONSTANTS.FLAGS.ATTACHED_TEMPLATE}`]: templateDoc.uuid
+            [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_TEMPLATE)]: templateDoc.uuid
         });
     });
     
