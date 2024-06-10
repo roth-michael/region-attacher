@@ -1,0 +1,48 @@
+{
+  "id": "region-attacher",
+  "title": "Region Attacher",
+  "description": "Allows attaching Scene Regions to templates on template creation",
+  "version": "#{VERSION}#",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12.327",
+    "maximum": "12.999"
+  },
+  "authors": [
+    {
+      "name": "Michael",
+      "url": "https://github.com/roth-michael",
+      "discord": "hi25114"
+    }
+  ],
+  "relationships": {
+    "systems": [{
+      "id": "dnd5e",
+      "type": "system",
+      "manifest": "https://github.com/foundryvtt/dnd5e/releases/download/latest/system.json",
+      "compatibility": {
+        "verified": "3.2.0",
+        "minimum": "3.2.0"
+      }
+    }],
+    "requires": []
+  },
+  "esmodules": [
+    "scripts/module.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    }
+  ],
+  "url": "#{URL}#",
+  "manifest": "#{MANIFEST}#",
+  "download": "#{DOWNLOAD}#",
+  "license": "LICENSE",
+  "readme": "README.md"
+}
