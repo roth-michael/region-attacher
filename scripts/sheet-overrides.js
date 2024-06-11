@@ -1,5 +1,5 @@
 import CONSTANTS from './constants.js';
-import { getFullFlagPath } from './helpers.js';
+import { getFullFlagPath, openRegionConfig } from './helpers.js';
 
 export default function registerSheetOverrides() {
     Hooks.on('renderItemSheet5e', patchItemSheet);
@@ -16,6 +16,10 @@ function getAttachRegionHtml(item, isTidy=false) {
                     <input type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''}>
                     ${game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
+                <button id="configureRegionButton" style="flex: 1;" ${attachRegionToTemplate ? '' : 'disabled'}>
+                    <i class="fa fa-gear"></i>
+                    ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
+                </button>
             </div>
         </div>
     `
@@ -29,6 +33,7 @@ function patchItemSheet(app, html, { item }) {
     let targetElem = targetTypeElem.parentNode.parentNode;
     if (!targetElem) return;
     $(getAttachRegionHtml(item)).insertAfter(targetElem);
+    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
 }
 
 function patchTidyItemSheet(app, element, { item }) {
@@ -44,4 +49,5 @@ function patchTidyItemSheet(app, element, { item }) {
     let targetElem = targetTypeElem.parentNode.parentNode;
     if (!targetElem) return;
     $(markupToInject).insertAfter(targetElem);
+    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
 }
