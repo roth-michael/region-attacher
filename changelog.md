@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.0.1
+- Fixed feedback loop that caused region to re-update whenever associated template was hovered
+
 ## Version 1.0.0
 - Added setting for the GM to allow players the see the checkbox & configuration button on their item sheets
     - If enabled, the player will still not be able to configure the region, but they'll be able to toggle whether it's created
