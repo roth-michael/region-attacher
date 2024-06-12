@@ -1,5 +1,5 @@
 import CONSTANTS from './constants.js';
-import { getFullFlagPath, openRegionConfig } from './helpers.js';
+import { getFullFlagPath, openRegionConfig, getSetting } from './helpers.js';
 
 export default function registerSheetOverrides() {
     Hooks.on('renderItemSheet5e', patchItemSheet);
@@ -7,6 +7,7 @@ export default function registerSheetOverrides() {
 }
 
 function getAttachRegionHtml(item, isTidy=false) {
+    let isGM = game.user.isGM;
     let attachRegionToTemplate = foundry.utils.getProperty(item, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
     return `
         <div class="form-group">
@@ -16,7 +17,7 @@ function getAttachRegionHtml(item, isTidy=false) {
                     <input type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''}>
                     ${game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
-                <button id="configureRegionButton" style="flex: 1;" ${attachRegionToTemplate ? '' : 'disabled'}>
+                <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
                     <i class="fa fa-gear"></i>
                     ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
                 </button>
@@ -26,6 +27,7 @@ function getAttachRegionHtml(item, isTidy=false) {
 }
 
 function patchItemSheet(app, html, { item }) {
+    if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
     if (app.options.classes.includes('tidy5e-sheet')) return;
     let targetTypeElem = html.find('select[name="system.target.type"]')?.[0];
     if (!targetTypeElem) return;
@@ -37,6 +39,7 @@ function patchItemSheet(app, html, { item }) {
 }
 
 function patchTidyItemSheet(app, element, { item }) {
+    if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
     const html = $(element);
     const markupToInject = `
         <div style="display: contents;" data-tidy-render-scheme="handlebars">

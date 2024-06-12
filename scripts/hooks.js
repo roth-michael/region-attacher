@@ -14,6 +14,15 @@ export default function registerHooks() {
         if (!game.user.isGM) return;
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         if (!region) return;
+        await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REFRESH_REGION, true);
+    });
+
+    Hooks.on('refreshMeasuredTemplate', async (template) => {
+        if (!game.user.isGM) return;
+        let templateDoc = template.document;
+        if (!templateDoc?.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REFRESH_REGION)) return;
+        let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+        if (!region) return;
         let origShape = templateDoc.object.shape;
         let points = origShape.points ?? origShape.toPolygon().points;
         let newShape = {

@@ -5,15 +5,12 @@ Allows attaching Scene Regions to templates on template creation.
 
 Adds a checkbox on the item page of any item which has a template-placing effect, and if checked will create a scene region with the exact shape of the border of the template upon template creation.
 
-Also adds a button beside the above checkbox which, when clicked, allows pre-configuration of the behaviors that the scene region should have.
+Also adds a button beside the checkbox which, when clicked, allows pre-configuration of the behaviors that the scene region should have.
 
-### Plans for release 1.0.0:
-- Socket temporary region creation during config so that players can pre-configure their own regions
-- Add setting for default created scene region visibility
-
-### Potential plans for beyond:
+### Potential plans for future updates:
 - Have scene regions reference highlighted grid rather than template outline for perfect grid-based parity of area coverage
 - Allow option for scene regions to be created _instead of_ templates, rather than just mirroring templates
+- Attach regions to tiles
 
 
 

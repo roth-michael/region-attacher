@@ -1,5 +1,11 @@
 # Region Attacher Changelog
 
+## Version 1.0.0
+- Added setting for the GM to disable showing players the checkbox & configuration button on their item sheets
+    - If unchecked, the player will still not be able to configure the region, but they'll be able to toggle whether it's created
+- Added setting for devault visibility of item-created regions (mirroring the dropdown available on a full scene region configuration window)
+- Scene regions should now stick more accurately to templates in the instance that they are rotated without moving their position
+
 ## Version 0.4.0
 - Region Configuration Menu added; now if attaching a Scene Region to an item-created template, can pre-configure its behaviors in the item sheet
     - For now, this is restricted only to GMs, as a temporary region is created in the background while the behaviors are pre-configured

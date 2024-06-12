@@ -32,7 +32,8 @@
     "scripts/constants.js",
     "scripts/helpers.js",
     "scripts/hooks.js",
-    "scripts/sheet-overrides.js"
+    "scripts/sheet-overrides.js",
+    "scripts/settings.js"
   ],
   "styles": [
     "styles/module.css"

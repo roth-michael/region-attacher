@@ -12,7 +12,7 @@ export async function createDependentRegion(templateDoc, originItem) {
         name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
         shapes: [shape],
         behaviors: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
-        visibility: 1 // TODO: have as an option
+        visibility: getSetting(CONSTANTS.SETTINGS.DEFAULT_REGION_VISIBILITY) ?? 0
     }]);
     let testRegion = testRegionArr[0]
     await testRegion.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_TEMPLATE, templateDoc.uuid);
@@ -22,6 +22,14 @@ export async function createDependentRegion(templateDoc, originItem) {
 
 export function getFullFlagPath(flag) {
     return `flags.${CONSTANTS.MODULE_NAME}.${flag}`;
+}
+
+export function getSetting(setting) {
+    if (!Array.from(game.settings.settings.keys()).includes(`${CONSTANTS.MODULE_NAME}.${setting}`)) {
+        console.warn(`Tried to get setting "${CONSTANTS.MODULE_NAME}.${setting}", which is not registered`)
+        return undefined;
+    }
+    return game.settings.get(CONSTANTS.MODULE_NAME, setting);
 }
 
 export async function openRegionConfig(item) {
