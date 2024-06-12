@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.0.2
+- Fixed bug introduced in last bugfix where region would never update
+
 ## Version 1.0.1
 - Fixed feedback loop that caused region to re-update whenever associated template was hovered
 

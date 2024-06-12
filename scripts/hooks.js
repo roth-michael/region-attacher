@@ -10,17 +10,10 @@ export default function registerHooks() {
         await createDependentRegion(templateDoc, originItem);
     });
 
-    Hooks.on('updateMeasuredTemplate', async (templateDoc) => {
-        if (!game.user.isGM) return;
-        let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
-        if (!region) return;
-    });
-
     Hooks.on('refreshMeasuredTemplate', async (template, { refreshGrid=false }) => {
         if (!refreshGrid) return;
         if (!game.user.isGM) return;
         let templateDoc = template.document;
-        if (!templateDoc?.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REFRESH_REGION)) return;
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         if (!region) return;
         let origShape = templateDoc.object.shape;

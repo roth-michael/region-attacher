@@ -6,7 +6,7 @@ export async function createDependentRegion(templateDoc, originItem) {
     let shape = {
         hole: false,
         type: 'polygon',
-        points: points
+        points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x)
     }
     let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
         name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
