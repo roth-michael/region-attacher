@@ -1,8 +1,8 @@
 # Region Attacher Changelog
 
 ## Version 1.0.0
-- Added setting for the GM to disable showing players the checkbox & configuration button on their item sheets
-    - If unchecked, the player will still not be able to configure the region, but they'll be able to toggle whether it's created
+- Added setting for the GM to allow players the see the checkbox & configuration button on their item sheets
+    - If enabled, the player will still not be able to configure the region, but they'll be able to toggle whether it's created
 - Added setting for devault visibility of item-created regions (mirroring the dropdown available on a full scene region configuration window)
 - Scene regions should now stick more accurately to templates in the instance that they are rotated without moving their position
 
