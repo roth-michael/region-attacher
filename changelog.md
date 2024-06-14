@@ -1,5 +1,11 @@
 # Region Attacher Changelog
 
+## Version 1.1.0
+- First pass at attaching regions to tiles; currently only supported after tile is created
+    - Currently when dragging a tile to change its size, there's some visual flickering, I hope to remedy that at some point
+- Changed region update code to only update once every 100ms at most, which should reduce any performance hit
+    - This change assumes only one region should be updating within a given 100ms window, so won't fully work for dragging multiple tiles with regions attached, for instance; in this case, moving each tile a small amount and back after such a multi-drag will update them each in turn
+
 ## Version 1.0.2
 - Fixed bug introduced in last bugfix where region would never update
 

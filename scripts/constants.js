@@ -3,8 +3,10 @@ const CONSTANTS = {
 
     FLAGS: {
         ATTACHED_TEMPLATE: 'attachedTemplate',
+        ATTACHED_TILE: 'attachedTile',
         ATTACHED_REGION: 'attachedRegion',
         ATTACH_REGION_TO_TEMPLATE: 'attachRegionToTemplate',
+        ATTACH_REGION_TO_TILE: 'attachRegionToTile',
         IS_CONFIG_REGION: 'isConfigRegion',
         REGION_BEHAVIORS: 'regionBehaviors',
         REFRESH_REGION: 'refreshRegion',

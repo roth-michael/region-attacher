@@ -2,6 +2,7 @@
     "REGION-ATTACHER": {
         "RegionAttacher": "Region Attacher",
         "AttachRegionToTemplate": "Attach Region to Template",
+        "AttachRegionToTile": "Attach Region to Tile",
         "ConfigureRegion": "Configure Region",
         "NonGMConfigureTooltip": "Only GMs can configure Scene Regions",
         "SETTINGS": {

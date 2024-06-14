@@ -1,6 +1,6 @@
 import CONSTANTS from './constants.js';
 
-export async function createDependentRegion(templateDoc, originItem) {
+export async function createDependentRegionForTemplate(templateDoc, originItem) {
     let origShape = templateDoc.object.shape ?? templateDoc.object._computeShape();
     let points = origShape.points ?? origShape.toPolygon().points;
     let shape = {
@@ -20,6 +20,28 @@ export async function createDependentRegion(templateDoc, originItem) {
     return testRegion;
 }
 
+export async function createDependentRegionForTile(tileDoc) {
+    let shape = {
+        hole: false,
+        type: 'rectangle',
+        x: tileDoc.x,
+        y: tileDoc.y,
+        width: tileDoc.width,
+        height: tileDoc.height,
+        rotation: tileDoc.rotation
+    }
+    let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
+        name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
+        shapes: [shape],
+        behaviors: tileDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
+        visibility: getSetting(CONSTANTS.SETTINGS.DEFAULT_REGION_VISIBILITY) ?? 0
+    }]);
+    let testRegion = testRegionArr[0]
+    await testRegion.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_TILE, tileDoc.uuid);
+    await tileDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION, testRegion.uuid);
+    return testRegion;
+}
+
 export function getFullFlagPath(flag) {
     return `flags.${CONSTANTS.MODULE_NAME}.${flag}`;
 }
@@ -32,14 +54,20 @@ export function getSetting(setting) {
     return game.settings.get(CONSTANTS.MODULE_NAME, setting);
 }
 
-export async function openRegionConfig(item) {
-    let tempRegion = (await canvas.scene.createEmbeddedDocuments('Region', [{
-        name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
-        shapes: [],
-        behaviors: item.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? []
-    }]))[0];
-    await tempRegion.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION, true);
-    await tempRegion.setFlag('dnd5e', 'origin', item.uuid);
-    let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: tempRegion}).render({force: true, parts: ['behaviors', 'footer']}));
+export async function openRegionConfig(parentDocument) {
+    let region;
+    if (parentDocument instanceof TileDocument) {
+        region = await fromUuid(parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+        if (!region) return;
+    } else {
+        region = (await canvas.scene.createEmbeddedDocuments('Region', [{
+            name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
+            shapes: [],
+            behaviors: parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? []
+        }]))[0];
+        await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION, true);
+        await region.setFlag('dnd5e', 'origin', parentDocument.uuid);
+    }
+    let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true, parts: ['behaviors', 'footer']}));
     renderedConfig.element.querySelector('section.tab.region-behaviors').classList += ' active';
 }
