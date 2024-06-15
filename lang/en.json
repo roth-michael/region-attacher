@@ -1,6 +1,7 @@
 {
     "REGION-ATTACHER": {
         "RegionAttacher": "Region Attacher",
+        "AttachRegion": "Attach Region",
         "AttachRegionToTemplate": "Attach Region to Template",
         "AttachRegionToTile": "Attach Region to Tile",
         "ConfigureRegion": "Configure Region",

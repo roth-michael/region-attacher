@@ -1,6 +1,6 @@
 import CONSTANTS from './constants.js';
 
-export async function createDependentRegionForTemplate(templateDoc, originItem) {
+export async function createDependentRegionForTemplate(templateDoc) {
     let origShape = templateDoc.object.shape ?? templateDoc.object._computeShape();
     let points = origShape.points ?? origShape.toPolygon().points;
     let shape = {
@@ -11,7 +11,7 @@ export async function createDependentRegionForTemplate(templateDoc, originItem) 
     let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
         name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
         shapes: [shape],
-        behaviors: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
+        behaviors: templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
         visibility: getSetting(CONSTANTS.SETTINGS.DEFAULT_REGION_VISIBILITY) ?? 0
     }]);
     let testRegion = testRegionArr[0]
@@ -55,9 +55,8 @@ export function getSetting(setting) {
 }
 
 export async function openRegionConfig(parentDocument) {
-    let region;
-    if (parentDocument instanceof TileDocument) {
-        region = await fromUuid(parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+    let region = await fromUuid(parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+    if (parentDocument instanceof TileDocument || parentDocument instanceof MeasuredTemplateDocument) {
         if (!region) return;
     } else {
         region = (await canvas.scene.createEmbeddedDocuments('Region', [{
@@ -66,7 +65,7 @@ export async function openRegionConfig(parentDocument) {
             behaviors: parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? []
         }]))[0];
         await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION, true);
-        await region.setFlag('dnd5e', 'origin', parentDocument.uuid);
+        await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ORIGIN, parentDocument.uuid);
     }
     let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true, parts: ['behaviors', 'footer']}));
     renderedConfig.element.querySelector('section.tab.region-behaviors').classList += ' active';

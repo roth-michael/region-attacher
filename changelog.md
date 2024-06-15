@@ -1,5 +1,9 @@
 # Region Attacher Changelog
 
+## Version 1.2.0
+- Should now be system agnostic (though with extra functionality for dnd5e)
+- MeasuredTemplate config now has an added toggle for enabling region attachment & configuring the attached region
+
 ## Version 1.1.0
 - First pass at attaching regions to tiles; currently only supported after tile is created
     - Currently when dragging a tile to change its size, there's some visual flickering, I hope to remedy that at some point

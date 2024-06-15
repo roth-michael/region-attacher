@@ -1,22 +1,26 @@
 import CONSTANTS from './constants.js';
 import { getFullFlagPath, openRegionConfig, getSetting } from './helpers.js';
 
-export default function registerSheetOverrides() {
+export function registerDnd5eSheetOverrides() {
     Hooks.on('renderItemSheet5e', patchItemSheet);
     Hooks.on('tidy5e-sheet.renderItemSheet', patchTidyItemSheet);
-    Hooks.on('renderTileConfig', patchTileConfig);
 }
 
-function getAttachRegionHtml(item, isTidy=false) {
+export function registerSheetOverrides() {
+    Hooks.on('renderTileConfig', patchTileConfig);
+    Hooks.on('renderMeasuredTemplateConfig', patchMeasuredTemplateConfig);
+}
+
+function getAttachRegionHtml(document, isTidy=false) {
     let isGM = game.user.isGM;
-    let attachRegionToTemplate = foundry.utils.getProperty(item, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
+    let attachRegionToTemplate = foundry.utils.getProperty(document, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
     return `
         <div class="form-group">
             <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
             <div class="form-fields">
                 <label class="checkbox" ${isTidy? 'style="width: 26ch;"' : ''}>
                     <input type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''}>
-                    ${game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
+                    ${document instanceof MeasuredTemplateDocument ? game.i18n.localize('REGION-ATTACHER.AttachRegion') : game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
                 <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
                     <i class="fa fa-gear"></i>
@@ -99,5 +103,13 @@ function patchTileConfig(app, html, {document}) {
             ${getAttachRegionTabHtml(document)}
         </div>
     `).insertAfter(secondTargetElem);
+    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(document)};
+}
+
+function patchMeasuredTemplateConfig(app, html, {document}) {
+    if (!game.user.isGM) return;
+    let targetElem = html.find('button[type="submit"]')?.[0];
+    if (!targetElem) return;
+    $(getAttachRegionHtml(document)).insertBefore(targetElem);
     html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(document)};
 }

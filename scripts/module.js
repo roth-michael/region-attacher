@@ -1,10 +1,11 @@
 import registerHooks from './hooks.js';
 import { registerSettings } from './settings.js';
-import registerSheetOverrides from './sheet-overrides.js';
+import { registerSheetOverrides, registerDnd5eSheetOverrides } from './sheet-overrides.js';
 
 Hooks.once('init', async function() {
     registerHooks();
     registerSheetOverrides();
+    if (game.system.id === 'dnd5e') registerDnd5eSheetOverrides();
     registerSettings();
 });
 

@@ -16,15 +16,7 @@
     }
   ],
   "relationships": {
-    "systems": [{
-      "id": "dnd5e",
-      "type": "system",
-      "manifest": "https://github.com/foundryvtt/dnd5e/releases/download/latest/system.json",
-      "compatibility": {
-        "verified": "3.2.0",
-        "minimum": "3.2.0"
-      }
-    }],
+    "systems": [],
     "requires": []
   },
   "esmodules": [

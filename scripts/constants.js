@@ -9,7 +9,7 @@ const CONSTANTS = {
         ATTACH_REGION_TO_TILE: 'attachRegionToTile',
         IS_CONFIG_REGION: 'isConfigRegion',
         REGION_BEHAVIORS: 'regionBehaviors',
-        REFRESH_REGION: 'refreshRegion',
+        ORIGIN: 'origin',
     },
 
     SETTINGS: {
