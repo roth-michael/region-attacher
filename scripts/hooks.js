@@ -2,8 +2,7 @@ import CONSTANTS from './constants.js';
 import { createDependentRegionForTemplate, createDependentRegionForTile, getFullFlagPath } from './helpers.js';
 
 export default function registerHooks() {
-    let tooSoon = false;
-    let toDoOnTimeout = () => {};
+    let shouldUpdateFlags = {};
 
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
@@ -24,9 +23,8 @@ export default function registerHooks() {
         await templateDoc.object.refresh();
     });
 
-    Hooks.on('refreshTile', async (tile, { refreshShape=false, refreshPosition=false, refreshRotation=false, refreshSize=false }) => {
+    Hooks.on('updateTile', async (tileDoc) => {
         if (!game.user.isGM) return;
-        let tileDoc = tile.document;
         let region = await fromUuid(tileDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         let shouldHaveRegion = tileDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE) || false;
         if (shouldHaveRegion && !region) {
@@ -37,30 +35,19 @@ export default function registerHooks() {
             await tileDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE, false);
             return;
         }
-        if (!refreshShape && !refreshPosition && !refreshRotation && !refreshSize) return;
         if (!region) return;
-        if (!tooSoon) {            
-            tooSoon = true;
-            setTimeout(() => {
-                tooSoon = false;;
-                toDoOnTimeout()
-            }, 100);
-        }
-        toDoOnTimeout = async () => {
-            let newShape = {
-                hole: false,
-                type: 'rectangle',
-                x: tileDoc.x,
-                y: tileDoc.y,
-                width: tileDoc.width,
-                height: tileDoc.height,
-                rotation: tileDoc.rotation
-            };
-            await region?.update({
-                'shapes': [newShape],
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_TILE)]: tileDoc.uuid
-            });
-        }
+        let newShape = {
+            hole: false,
+            type: 'rectangle',
+            x: tileDoc.x,
+            y: tileDoc.y,
+            width: tileDoc.width,
+            height: tileDoc.height,
+            rotation: tileDoc.rotation
+        };
+        await region?.update({
+            'shapes': [newShape]
+        });
     });
 
     Hooks.on('deleteTile', async (tileDoc) => {
@@ -70,9 +57,8 @@ export default function registerHooks() {
         await region.delete();
     });
 
-    Hooks.on('refreshMeasuredTemplate', async (template, { refreshGrid=false }) => {
+    Hooks.on('updateMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
-        let templateDoc = template.document;
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         let shouldHaveRegion = templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) || false;
         if (shouldHaveRegion && !region) {
@@ -82,29 +68,29 @@ export default function registerHooks() {
             await region.delete();
             await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE, false);
         }
-        if (!refreshGrid) return;
         if (!region) return;
-        if (!tooSoon) {
-            tooSoon = true;
-            setTimeout(() => {
-                tooSoon = false;
-                toDoOnTimeout();
-            }, 100);
+        shouldUpdateFlags[templateDoc.uuid] = true;
+    });
+
+    Hooks.on('refreshMeasuredTemplate', async (template) => {
+        if (!game.user.isGM) return;
+        let templateDoc = template.document;
+        if (!templateDoc) return;
+        let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+        if (!region) return;
+        if (!shouldUpdateFlags[templateDoc.uuid]) return;
+        let origShape = templateDoc.object?.shape;
+        if (!origShape) return;
+        let points = origShape.points ?? origShape.toPolygon().points;
+        let newShape = {
+            points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x),
+            hole: false,
+            type: 'polygon'
         }
-        toDoOnTimeout = async () => {
-            let origShape = templateDoc.object?.shape;
-            if (!origShape) return;
-            let points = origShape.points ?? origShape.toPolygon().points;
-            let newShape = {
-                points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x),
-                hole: false,
-                type: 'polygon'
-            }
-            await region?.update({
-                'shapes': [newShape],
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_TEMPLATE)]: templateDoc.uuid
-            });
-        }
+        await region?.update({
+            'shapes': [newShape]
+        });
+        delete shouldUpdateFlags[templateDoc.uuid];
     });
     
     Hooks.on('deleteMeasuredTemplate', async (templateDoc) => {

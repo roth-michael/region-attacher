@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.3.0
+- Got rid of the "live-preview" of regions moving while templates/tiles were being dragged or resized - this caused some visual bugs & could cause unintended interactions on the scene
+
 ## Version 1.2.0
 - Should now be system agnostic (though with extra functionality for dnd5e)
 - MeasuredTemplate config now has an added toggle for enabling region attachment & configuring the attached region
