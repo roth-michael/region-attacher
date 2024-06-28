@@ -133,7 +133,7 @@ function patchMeasuredTemplateConfig(app, html, {document}) {
     if (!game.user.isGM) return;
     html.height('auto');
     let tabs = html.find('nav');
-    if (tabs) {
+    if (tabs.length) {
         let targetElem = tabs.next().children().last()?.[0];
         if (!targetElem) return;
         $(getAttachRegionHtml(document)).insertAfter(targetElem);

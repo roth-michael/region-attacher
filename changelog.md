@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.4.1
+- Fixed broken Measured Template config
+
 ## Version 1.4.0
 - Fixed regions to still live-update for templates as long as the GM isn't dragging something on the canvas - this should allow regins to "stick to" moving tokens (if a template is attached to a token)
 - Measured Template config improvements:
