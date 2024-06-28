@@ -1,5 +1,13 @@
 # Region Attacher Changelog
 
+## Version 1.4.0
+- Fixed regions to still live-update for templates as long as the GM isn't dragging something on the canvas - this should allow regins to "stick to" moving tokens (if a template is attached to a token)
+- Measured Template config improvements:
+    - Added compatibility for modules which add tabs to config
+    - Fixed bug where pressing "Configure Region" in config would close the config
+    - Clicking "Attach Region" checkbox in config now immediately updates the template, so you can attach & configure without having to hit "Update Measured Template"
+- Clicking "Attach Region" checkbox in Tile config no longer resets the active tab
+
 ## Version 1.3.0
 - Got rid of the "live-preview" of regions moving while templates/tiles were being dragged or resized - this caused some visual bugs & could cause unintended interactions on the scene
 

@@ -19,7 +19,7 @@ function getAttachRegionHtml(document, isTidy=false) {
             <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
             <div class="form-fields">
                 <label class="checkbox" ${isTidy? 'style="width: 26ch;"' : ''}>
-                    <input type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''}>
+                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''}>
                     ${document instanceof MeasuredTemplateDocument ? game.i18n.localize('REGION-ATTACHER.AttachRegion') : game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
                 <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
@@ -77,7 +77,7 @@ function getAttachRegionTabHtml(document) {
             <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
             <div class="form-fields">
                 <label class="checkbox">
-                    <input type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)}" ${attachRegionToTile ? 'checked' : ''}>
+                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)}" ${attachRegionToTile ? 'checked' : ''}>
                     ${game.i18n.localize('REGION-ATTACHER.AttachRegionToTile')}
                 </label>
                 <button id="configureRegionButton" type="button" style="flex: 1;" ${(attachRegionToTile && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
@@ -103,13 +103,55 @@ function patchTileConfig(app, html, {document}) {
             ${getAttachRegionTabHtml(document)}
         </div>
     `).insertAfter(secondTargetElem);
+    if (document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)) {
+        foundry.utils.setProperty(document, getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH), false);
+        html.find('nav>[data-tab="region"]')[0].click();
+        let closeElement;
+        if (html.is('form')) {
+            closeElement = html.parent().prev().find('.close')[0];
+        } else {
+            closeElement = html.find('.close')[0];
+        }
+        let restoreNormalFunc = async () => {
+            document.update({
+                [getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)]: false
+            });
+        };
+        closeElement.onclick = restoreNormalFunc;
+        html.find('button[type="submit"]')[0].onclick = restoreNormalFunc;
+    }
     html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(document)};
+    html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
+        await document.update({
+            [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)]: event.target.checked,
+            [getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)]: true
+        });
+    };
 }
 
 function patchMeasuredTemplateConfig(app, html, {document}) {
     if (!game.user.isGM) return;
-    let targetElem = html.find('button[type="submit"]')?.[0];
-    if (!targetElem) return;
-    $(getAttachRegionHtml(document)).insertBefore(targetElem);
-    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(document)};
+    html.height('auto');
+    let tabs = html.find('nav');
+    if (tabs) {
+        let targetElem = tabs.next().children().last()?.[0];
+        if (!targetElem) return;
+        $(getAttachRegionHtml(document)).insertAfter(targetElem);
+        html.find('#configureRegionButton')[0].onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
+        html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
+            await document.update({
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
+            });
+        }
+    } else {
+        let targetElem = html.find('button[type="submit"]')?.[0];
+        if (!targetElem) return;
+        $(getAttachRegionHtml(document)).insertBefore(targetElem);
+        html.find('#configureRegionButton')[0].onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
+        html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
+            await document.update({
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
+            });
+        }
+    }
 }

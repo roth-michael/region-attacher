@@ -10,6 +10,7 @@ const CONSTANTS = {
         IS_CONFIG_REGION: 'isConfigRegion',
         REGION_BEHAVIORS: 'regionBehaviors',
         ORIGIN: 'origin',
+        JUST_TOGGLED_ATTACH: 'justToggledAttach',
     },
 
     SETTINGS: {

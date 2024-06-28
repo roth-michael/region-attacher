@@ -2,7 +2,7 @@ import CONSTANTS from './constants.js';
 import { createDependentRegionForTemplate, createDependentRegionForTile, getFullFlagPath } from './helpers.js';
 
 export default function registerHooks() {
-    let shouldUpdateFlags = {};
+    let modifyingRegionFlags = {};
 
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
@@ -17,10 +17,6 @@ export default function registerHooks() {
             }
             await templateDoc.update(update);
         }
-    });
-
-    Hooks.on('updateMeasuredTemplate', async (templateDoc) => {
-        await templateDoc.object.refresh();
     });
 
     Hooks.on('updateTile', async (tileDoc) => {
@@ -59,6 +55,8 @@ export default function registerHooks() {
 
     Hooks.on('updateMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
+        if (modifyingRegionFlags[templateDoc.uuid]) return;
+        modifyingRegionFlags[templateDoc.uuid] = true;
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         let shouldHaveRegion = templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) || false;
         if (shouldHaveRegion && !region) {
@@ -68,17 +66,18 @@ export default function registerHooks() {
             await region.delete();
             await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE, false);
         }
+        delete modifyingRegionFlags[templateDoc.uuid];
         if (!region) return;
-        shouldUpdateFlags[templateDoc.uuid] = true;
     });
 
     Hooks.on('refreshMeasuredTemplate', async (template) => {
         if (!game.user.isGM) return;
+        let isDragging = game.canvas.currentMouseManager?.isDragging;
+        if (isDragging) return;
         let templateDoc = template.document;
         if (!templateDoc) return;
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         if (!region) return;
-        if (!shouldUpdateFlags[templateDoc.uuid]) return;
         let origShape = templateDoc.object?.shape;
         if (!origShape) return;
         let points = origShape.points ?? origShape.toPolygon().points;
@@ -90,7 +89,6 @@ export default function registerHooks() {
         await region?.update({
             'shapes': [newShape]
         });
-        delete shouldUpdateFlags[templateDoc.uuid];
     });
     
     Hooks.on('deleteMeasuredTemplate', async (templateDoc) => {
