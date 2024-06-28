@@ -3,6 +3,7 @@ import { createDependentRegionForTemplate, createDependentRegionForTile, getFull
 
 export default function registerHooks() {
     let modifyingRegionFlags = {};
+    let updateRegionFlags = {};
 
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
@@ -76,19 +77,31 @@ export default function registerHooks() {
         if (isDragging) return;
         let templateDoc = template.document;
         if (!templateDoc) return;
-        let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
-        if (!region) return;
-        let origShape = templateDoc.object?.shape;
-        if (!origShape) return;
-        let points = origShape.points ?? origShape.toPolygon().points;
-        let newShape = {
-            points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x),
-            hole: false,
-            type: 'polygon'
+        let funcToDo = async () => {
+            let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+            if (!region) return;
+            let origShape = templateDoc.object?.shape;
+            if (!origShape) return;
+            let points = origShape.points ?? origShape.toPolygon().points;
+            let newShape = {
+                points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x),
+                hole: false,
+                type: 'polygon'
+            }
+            await region?.update({
+                'shapes': [newShape]
+            });
+        };
+        if (updateRegionFlags[templateDoc.uuid]) {
+            updateRegionFlags[templateDoc.uuid] = funcToDo;
+            return;
+        } else {
+            updateRegionFlags[templateDoc.uuid] = funcToDo;
+            setTimeout(async () => {
+                await updateRegionFlags[templateDoc.uuid]();
+                delete updateRegionFlags[templateDoc.uuid];
+            }, 50)
         }
-        await region?.update({
-            'shapes': [newShape]
-        });
     });
     
     Hooks.on('deleteMeasuredTemplate', async (templateDoc) => {
