@@ -11,6 +11,8 @@ const CONSTANTS = {
         REGION_BEHAVIORS: 'regionBehaviors',
         ORIGIN: 'origin',
         JUST_TOGGLED_ATTACH: 'justToggledAttach',
+        ITEM_UUID: 'itemUuid',
+        ACTOR_UUID: 'actorUuid',
     },
 
     SETTINGS: {

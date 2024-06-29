@@ -61,14 +61,26 @@ export default function registerHooks() {
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         let shouldHaveRegion = templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) || false;
         if (shouldHaveRegion && !region) {
-            await createDependentRegionForTemplate(templateDoc);
+            region = await createDependentRegionForTemplate(templateDoc);
+            let itemUuid = templateDoc.flags?.dnd5e?.origin;
+            if (itemUuid) {
+                let actorUuid = (await fromUuid(itemUuid))?.actor?.uuid;
+                let updates = {
+                    'flags': {
+                        [CONSTANTS.MODULE_NAME]: {
+                            [CONSTANTS.FLAGS.ITEM_UUID]: itemUuid
+                        }
+                    }
+                }
+                if (actorUuid) updates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTOR_UUID] = actorUuid;
+                await region.update(updates);
+            }
             await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE, true);
         } else if (region && !shouldHaveRegion) {
             await region.delete();
             await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE, false);
         }
         delete modifyingRegionFlags[templateDoc.uuid];
-        if (!region) return;
     });
 
     Hooks.on('refreshMeasuredTemplate', async (template) => {

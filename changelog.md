@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.4.2
+- Added `itemUuid` and `actorUuid` flags on regions created via an item's template
+
 ## Version 1.4.1
 - Fixed broken Measured Template config
 
