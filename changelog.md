@@ -1,5 +1,9 @@
 # Region Attacher Changelog
 
+## Version 1.4.3
+- Translation updates (thanks Kharmans)
+    - Now includes pt-BR translation
+
 ## Version 1.4.2
 - Added `itemUuid` and `actorUuid` flags on regions created via an item's template
 
