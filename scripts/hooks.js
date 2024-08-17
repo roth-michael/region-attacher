@@ -11,12 +11,24 @@ export default function registerHooks() {
             let originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
             if (!originItem) return;
             if (!(originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) return;
-            let update = {
+            let templateUpdates = {
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION),
                 [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) || [],
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true
-            }
-            await templateDoc.update(update);
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true,
+                [getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true
+            };
+            let region = await createDependentRegionForTemplate(templateDoc);
+            let actorUuid = originItem.actor?.uuid;
+            let regionUpdates = {
+                'flags': {
+                    [CONSTANTS.MODULE_NAME]: {
+                        [CONSTANTS.FLAGS.ITEM_UUID]: originItem.uuid
+                    }
+                }
+            };
+            if (actorUuid) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTOR_UUID] = actorUuid;
+            await region.update(regionUpdates);
+            await templateDoc.update(templateUpdates);
         }
     });
 
@@ -57,6 +69,7 @@ export default function registerHooks() {
     Hooks.on('updateMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
         if (modifyingRegionFlags[templateDoc.uuid]) return;
+        if (!templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.CREATION_COMPLETE)) return;
         modifyingRegionFlags[templateDoc.uuid] = true;
         let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
         let shouldHaveRegion = templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) || false;
@@ -89,7 +102,9 @@ export default function registerHooks() {
         if (isDragging) return;
         let templateDoc = template.document;
         if (!templateDoc) return;
-        let funcToDo = async () => {
+        if (updateRegionFlags[templateDoc.uuid]) return;
+        updateRegionFlags[templateDoc.uuid] = true;
+        setTimeout(async () => {
             let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
             if (!region) return;
             let origShape = templateDoc.object?.shape;
@@ -103,17 +118,8 @@ export default function registerHooks() {
             await region?.update({
                 'shapes': [newShape]
             });
-        };
-        if (updateRegionFlags[templateDoc.uuid]) {
-            updateRegionFlags[templateDoc.uuid] = funcToDo;
-            return;
-        } else {
-            updateRegionFlags[templateDoc.uuid] = funcToDo;
-            setTimeout(async () => {
-                await updateRegionFlags[templateDoc.uuid]();
-                delete updateRegionFlags[templateDoc.uuid];
-            }, 50)
-        }
+            delete updateRegionFlags[templateDoc.uuid];
+        }, 50)
     });
     
     Hooks.on('deleteMeasuredTemplate', async (templateDoc) => {

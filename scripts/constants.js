@@ -13,6 +13,7 @@ const CONSTANTS = {
         JUST_TOGGLED_ATTACH: 'justToggledAttach',
         ITEM_UUID: 'itemUuid',
         ACTOR_UUID: 'actorUuid',
+        CREATION_COMPLETE: 'creationComplete'
     },
 
     SETTINGS: {
