@@ -3,6 +3,7 @@
 ## Version 1.4.4
 - Fixed the wrong region uuid being present on a just-created template
 - Minor logic change to marginally improve performance
+- Fixed a bug where build-a-bonus would throw an error when opening modified region-attacher region config windows
 
 ## Version 1.4.3
 - Translation updates (thanks Kharmans)
