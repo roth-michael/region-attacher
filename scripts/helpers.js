@@ -1,6 +1,6 @@
 import CONSTANTS from './constants.js';
 
-export async function createDependentRegionForTemplate(templateDoc) {
+export async function createDependentRegionForTemplate(templateDoc, specifiedBehaviors) {
     let origShape = templateDoc.object.shape ?? templateDoc.object._computeShape();
     let points = origShape.points ?? origShape.toPolygon().points;
     let shape = {
@@ -11,7 +11,7 @@ export async function createDependentRegionForTemplate(templateDoc) {
     let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
         name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
         shapes: [shape],
-        behaviors: templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
+        behaviors: specifiedBehaviors ?? templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
         visibility: getSetting(CONSTANTS.SETTINGS.DEFAULT_REGION_VISIBILITY) ?? 0
     }]);
     let testRegion = testRegionArr[0]
@@ -67,6 +67,6 @@ export async function openRegionConfig(parentDocument) {
         await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION, true);
         await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ORIGIN, parentDocument.uuid);
     }
-    let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true, parts: ['behaviors', 'footer']}));
+    let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true}));
     renderedConfig.element.querySelector('section.tab.region-behaviors').classList += ' active';
 }

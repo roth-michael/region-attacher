@@ -17,7 +17,7 @@ export default function registerHooks() {
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true,
                 [getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true
             };
-            let region = await createDependentRegionForTemplate(templateDoc);
+            let region = await createDependentRegionForTemplate(templateDoc, originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS));
             let actorUuid = originItem.actor?.uuid;
             let regionUpdates = {
                 'flags': {
@@ -102,6 +102,7 @@ export default function registerHooks() {
         if (isDragging) return;
         let templateDoc = template.document;
         if (!templateDoc) return;
+        if (!templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.CREATION_COMPLETE)) return;
         if (updateRegionFlags[templateDoc.uuid]) return;
         updateRegionFlags[templateDoc.uuid] = true;
         setTimeout(async () => {
@@ -152,9 +153,9 @@ export default function registerHooks() {
         if (!regionConfig.document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION) &&
             !regionConfig.document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_TILE) &&
             !regionConfig.document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_TEMPLATE)) return;
-        element.querySelector('nav')?.remove();
-        element.querySelector('section.tab.region-shapes')?.remove();
-        element.querySelector('section.tab.region-identity')?.remove();
+        element.querySelector('nav')?.classList?.add('hidden');
+        element.querySelector('section.tab.region-shapes')?.classList?.add('hidden');
+        element.querySelector('section.tab.region-identity')?.classList?.add('hidden');
         element.querySelector('section.tab.region-behaviors').classList.add('active');
     });
 }
