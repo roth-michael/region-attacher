@@ -7,8 +7,14 @@ export default function registerHooks() {
 
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
-        if (game.system.id === 'dnd5e') {
-            let originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
+        let systemId = game.system.id;
+        if (['dnd5e', 'pf2e'].includes(systemId)) {
+            let originItem;
+            if (systemId === 'dnd5e') {
+                originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
+            } else if (systemId === 'pf2e') {
+                originItem = await fromUuid(templateDoc.getFlag('pf2e', 'origin.uuid'));
+            }
             if (!originItem) return;
             if (!(originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) return;
             let templateUpdates = {
@@ -29,6 +35,8 @@ export default function registerHooks() {
             if (actorUuid) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTOR_UUID] = actorUuid;
             await region.update(regionUpdates);
             await templateDoc.update(templateUpdates);
+        } else {
+            await templateDoc.update({[getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true});
         }
     });
 
@@ -75,7 +83,12 @@ export default function registerHooks() {
         let shouldHaveRegion = templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) || false;
         if (shouldHaveRegion && !region) {
             region = await createDependentRegionForTemplate(templateDoc);
-            let itemUuid = templateDoc.flags?.dnd5e?.origin;
+            let itemUuid;
+            if (game.system.id === 'dnd5e') {
+                itemUuid = templateDoc.flags?.dnd5e?.origin;
+            } else if (game.system.id === 'pf2e') {
+                itemUuid = templateDoc.flags?.pf2e?.origin?.uuid;
+            }
             if (itemUuid) {
                 let actorUuid = (await fromUuid(itemUuid))?.actor?.uuid;
                 let updates = {
@@ -103,6 +116,7 @@ export default function registerHooks() {
         let templateDoc = template.document;
         if (!templateDoc) return;
         if (!templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.CREATION_COMPLETE)) return;
+        if (!templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) return;
         if (updateRegionFlags[templateDoc.uuid]) return;
         updateRegionFlags[templateDoc.uuid] = true;
         setTimeout(async () => {

@@ -4,6 +4,11 @@ import { getFullFlagPath, openRegionConfig, getSetting } from './helpers.js';
 export function registerDnd5eSheetOverrides() {
     Hooks.on('renderItemSheet5e', patchItemSheet);
     Hooks.on('tidy5e-sheet.renderItemSheet', patchTidyItemSheet);
+    // Hooks.on('renderActivitySheet', patchActivitySheet);
+}
+
+export function registerPF2eSheetOverrides() {
+    Hooks.on('renderItemSheetPF2e', patchPF2eItemSheet);
 }
 
 export function registerSheetOverrides() {
@@ -19,7 +24,7 @@ function getAttachRegionHtml(document, isTidy=false) {
             <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
             <div class="form-fields">
                 <label class="checkbox" ${isTidy? 'style="width: 26ch;"' : ''}>
-                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''}>
+                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''} ${game.system.id === 'pf2e' ? 'style="margin-top: -5px;"' : ''}>
                     ${document instanceof MeasuredTemplateDocument ? game.i18n.localize('REGION-ATTACHER.AttachRegion') : game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
                 <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
@@ -31,6 +36,7 @@ function getAttachRegionHtml(document, isTidy=false) {
     `
 }
 
+// dnd5e 3.x
 function patchItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
     if (app.options.classes.includes('tidy5e-sheet')) return;
@@ -43,10 +49,43 @@ function patchItemSheet(app, html, { item }) {
     html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
 }
 
+// dnd5e 4.x - in progress
+// function patchActivitySheet(app, element) {
+//     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
+//     if (app.options.classes.includes('tidy5e-sheet')) return;
+//     let html = $(element);
+//     let templateTypeElem = html.find('select[name="target.template.type"]')?.[0];
+//     if (!templateTypeElem?.value?.length) return;
+//     let targetElem = templateTypeElem.parentNode.parentNode;
+//     if (!targetElem) return;
+//     let attachRegionToTemplate = foundry.utils.getProperty(app.activity, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
+//     let attachCheckbox = dnd5e.applications.fields.createCheckboxInput(undefined, {
+//         name: getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE),
+//         value: attachRegionToTemplate
+//     });
+//     let attachCheckboxGroup = foundry.applications.fields.createFormGroup({
+//         label: 'REGION-ATTACHER.AttachRegionToTemplate',
+//         localize: true,
+//         input: attachCheckbox
+//     });
+//     $(attachCheckboxGroup).insertAfter(targetElem);
+// }
+
+// PF2e
+function patchPF2eItemSheet(app, html, { item }) {
+    if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
+    let areaTypeElem = html.find('select[name="system.area.type"]')?.[0];
+    if (!areaTypeElem?.value?.length) return;
+    let targetElem = areaTypeElem.parentNode.parentNode;
+    if (!targetElem) return;
+    $(getAttachRegionHtml(item)).insertAfter(targetElem);
+    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
+}
+
 function patchTidyItemSheet(app, element, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
-    const html = $(element);
-    const markupToInject = `
+    let html = $(element);
+    let markupToInject = `
         <div style="display: contents;" data-tidy-render-scheme="handlebars">
             ${getAttachRegionHtml(item, true)}
         </div>

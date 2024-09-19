@@ -1,5 +1,9 @@
 # Region Attacher Changelog
 
+## Version 1.5.0
+- Added compatibility with PF2e item sheets similar to dnd5e's functionality
+- Fixed a bug where regions couldn't be attached to existing Templates
+
 ## Version 1.4.4
 - Fixed the wrong region uuid being present on a just-created template
 - Minor logic change to marginally improve performance
