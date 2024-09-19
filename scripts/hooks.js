@@ -15,8 +15,10 @@ export default function registerHooks() {
             } else if (systemId === 'pf2e') {
                 originItem = await fromUuid(templateDoc.getFlag('pf2e', 'origin.uuid'));
             }
-            if (!originItem) return;
-            if (!(originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) return;
+            if (!(originItem?.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) {
+                await templateDoc.update({[getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true});
+                return;
+            };
             let templateUpdates = {
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION),
                 [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) || [],
