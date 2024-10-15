@@ -10,22 +10,27 @@ export default function registerHooks() {
         let systemId = game.system.id;
         if (['dnd5e', 'pf2e'].includes(systemId)) {
             let originItem;
+            let activity;
             if (systemId === 'dnd5e') {
                 originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
+                if (originItem?.documentName === 'Activity') {
+                    activity = originItem;
+                    originItem = originItem.item;
+                }
             } else if (systemId === 'pf2e') {
                 originItem = await fromUuid(templateDoc.getFlag('pf2e', 'origin.uuid'));
             }
-            if (!(originItem?.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) ?? false)) {
+            if (!(originItem?.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE + (activity ? `.${activity.id}` : '')) ?? false)) {
                 await templateDoc.update({[getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true});
                 return;
             };
             let templateUpdates = {
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION),
-                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) || [],
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION + (activity ? `.${activity.id}` : '')),
+                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + (activity ? `.${activity.id}` : '')) || [],
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true,
                 [getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true
             };
-            let region = await createDependentRegionForTemplate(templateDoc, originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS));
+            let region = await createDependentRegionForTemplate(templateDoc, originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + (activity ? `.${activity.id}` : '')));
             let actorUuid = originItem.actor?.uuid;
             let regionUpdates = {
                 'flags': {
@@ -34,6 +39,7 @@ export default function registerHooks() {
                     }
                 }
             };
+            if (activity) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTIVITY_UUID] = activity.uuid;
             if (actorUuid) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTOR_UUID] = actorUuid;
             await region.update(regionUpdates);
             await templateDoc.update(templateUpdates);
@@ -92,7 +98,13 @@ export default function registerHooks() {
                 itemUuid = templateDoc.flags?.pf2e?.origin?.uuid;
             }
             if (itemUuid) {
-                let actorUuid = (await fromUuid(itemUuid))?.actor?.uuid;
+                let originItem = await fromUuid(itemUuid);
+                let activity;
+                if (originItem?.documentName === 'Activity') {
+                    activity = originItem;
+                    originItem = originItem.item;
+                }
+                let actorUuid = originItem?.actor?.uuid;
                 let updates = {
                     'flags': {
                         [CONSTANTS.MODULE_NAME]: {
@@ -100,6 +112,7 @@ export default function registerHooks() {
                         }
                     }
                 }
+                if (activity) updates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTIVITY_UUID] = activity.uuid;
                 if (actorUuid) updates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTOR_UUID] = actorUuid;
                 await region.update(updates);
             }
@@ -123,9 +136,15 @@ export default function registerHooks() {
         updateRegionFlags[templateDoc.uuid] = true;
         setTimeout(async () => {
             let region = await fromUuid(templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
-            if (!region) return;
+            if (!region) {
+                delete updateRegionFlags[templateDoc.uuid];
+                return;
+            }
             let origShape = templateDoc.object?.shape;
-            if (!origShape) return;
+            if (!origShape) {
+                delete updateRegionFlags[templateDoc.uuid];
+                return;
+            }
             let points = origShape.points ?? origShape.toPolygon().points;
             let newShape = {
                 points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x),
@@ -152,7 +171,11 @@ export default function registerHooks() {
         if (regionConfig.document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION)) {
             let parentItem = await fromUuid(regionConfig.document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ORIGIN));
             if (!parentItem) return;
-            await parentItem.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS, regionBehaviors);
+            if (game.system.id === 'dnd5e' && parentItem.documentName === 'Activity') {
+                await parentItem.item?.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + `.${parentItem.id}`, regionBehaviors);
+            } else {
+                await parentItem.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS, regionBehaviors);
+            }
             if (parentItem instanceof TileDocument) return;
             await regionConfig.document.delete();
         } else {

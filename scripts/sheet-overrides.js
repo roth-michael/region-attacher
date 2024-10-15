@@ -2,9 +2,12 @@ import CONSTANTS from './constants.js';
 import { getFullFlagPath, openRegionConfig, getSetting } from './helpers.js';
 
 export function registerDnd5eSheetOverrides() {
-    Hooks.on('renderItemSheet5e', patchItemSheet);
-    Hooks.on('tidy5e-sheet.renderItemSheet', patchTidyItemSheet);
-    // Hooks.on('renderActivitySheet', patchActivitySheet);
+    if (foundry.utils.isNewerVersion(4, game.system.version)) {
+        Hooks.on('renderItemSheet5e', patchItemSheet);
+        Hooks.on('tidy5e-sheet.renderItemSheet', patchTidyItemSheet);
+    } else {
+        Hooks.on('renderActivitySheet', patchActivitySheet);
+    }
 }
 
 export function registerPF2eSheetOverrides() {
@@ -49,27 +52,48 @@ function patchItemSheet(app, html, { item }) {
     html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
 }
 
-// dnd5e 4.x - in progress
-// function patchActivitySheet(app, element) {
-//     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
-//     if (app.options.classes.includes('tidy5e-sheet')) return;
-//     let html = $(element);
-//     let templateTypeElem = html.find('select[name="target.template.type"]')?.[0];
-//     if (!templateTypeElem?.value?.length) return;
-//     let targetElem = templateTypeElem.parentNode.parentNode;
-//     if (!targetElem) return;
-//     let attachRegionToTemplate = foundry.utils.getProperty(app.activity, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
-//     let attachCheckbox = dnd5e.applications.fields.createCheckboxInput(undefined, {
-//         name: getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE),
-//         value: attachRegionToTemplate
-//     });
-//     let attachCheckboxGroup = foundry.applications.fields.createFormGroup({
-//         label: 'REGION-ATTACHER.AttachRegionToTemplate',
-//         localize: true,
-//         input: attachCheckbox
-//     });
-//     $(attachCheckboxGroup).insertAfter(targetElem);
-// }
+// dnd5e 4.x
+function patchActivitySheet(app, element) {
+    if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
+    if (app.options.classes.includes('tidy5e-sheet')) return;
+    let html = $(element);
+    let templateTypeElem = html.find('select[name="target.template.type"]')?.[0];
+    if (!templateTypeElem?.value?.length) return;
+    let targetElem = templateTypeElem.parentNode.parentNode;
+    if (!targetElem) return;
+    let fullFlag = getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) + `.${app.activity.id}`;
+    let attachRegionToTemplate = foundry.utils.getProperty(app.item, fullFlag) ?? false;
+    let attachCheckbox = dnd5e.applications.fields.createCheckboxInput(undefined, {
+        name: getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE),
+        value: attachRegionToTemplate
+    });
+    attachCheckbox._onClick = async (event) => {
+        event.preventDefault();
+        let activityId = app.activity?.id;
+        let item = app.item;
+        if (!item || !activityId) return;
+        await item.update({[fullFlag]: !event.target.checked});
+    }
+    let attachCheckboxGroup = foundry.applications.fields.createFormGroup({
+        label: 'REGION-ATTACHER.AttachRegionToTemplate',
+        localize: true,
+        input: attachCheckbox
+    });
+    let configureButton = $(`
+        <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && game.user.isGM) ? '' : 'disabled'} ${game.user.isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
+            <i class="fa fa-gear"></i>
+            ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
+        </button>
+    `)[0];
+    configureButton.onclick = () => {openRegionConfig(app.item, app.activity)};
+    let configureButtonGroup = foundry.applications.fields.createFormGroup({
+        label: 'REGION-ATTACHER.RegionAttacher',
+        localize: true,
+        input: configureButton
+    });
+    $(configureButtonGroup).insertAfter(targetElem);
+    $(attachCheckboxGroup).insertAfter(targetElem);
+}
 
 // PF2e
 function patchPF2eItemSheet(app, html, { item }) {

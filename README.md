@@ -10,7 +10,6 @@ Also adds a button beside the checkbox which, when clicked, allows pre-configura
 ### Potential plans for future updates:
 - Have scene regions reference highlighted grid rather than template outline for perfect grid-based parity of area coverage
 - Allow option for scene regions to be created _instead of_ templates, rather than just mirroring templates
-- Attach regions to tiles
 
 
 

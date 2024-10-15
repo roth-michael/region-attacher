@@ -54,7 +54,7 @@ export function getSetting(setting) {
     return game.settings.get(CONSTANTS.MODULE_NAME, setting);
 }
 
-export async function openRegionConfig(parentDocument) {
+export async function openRegionConfig(parentDocument, parentActivity) {
     let region = await fromUuid(parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
     if (parentDocument instanceof TileDocument || parentDocument instanceof MeasuredTemplateDocument) {
         if (!region) return;
@@ -62,10 +62,10 @@ export async function openRegionConfig(parentDocument) {
         region = (await canvas.scene.createEmbeddedDocuments('Region', [{
             name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
             shapes: [],
-            behaviors: parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? []
+            behaviors: parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + (parentActivity ? `.${parentActivity.id}` : '')) ?? []
         }]))[0];
         await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION, true);
-        await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ORIGIN, parentDocument.uuid);
+        await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ORIGIN, (parentActivity ?? parentDocument).uuid);
     }
     let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true}));
     renderedConfig.element.querySelector('section.tab.region-behaviors').classList += ' active';

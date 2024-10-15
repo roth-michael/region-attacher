@@ -1,5 +1,11 @@
 # Region Attacher Changelog
 
+## Version 1.6.0
+- Added compatibility with dnd5e v4.x
+    - In 4.x, region attacher functionality is configured per-activity, not per-item; see the Activation tab, Targeting subtab when an area is selected
+    - Should still remain compatible with 3.x
+- Fixed a bug where template-attached regions would get "stuck" until a refresh
+
 ## Version 1.5.1
 - _Actually_ fixed the aforementioned bug
 
