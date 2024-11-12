@@ -22,15 +22,16 @@ export function registerSheetOverrides() {
 function getAttachRegionHtml(document, isTidy=false) {
     let isGM = game.user.isGM;
     let attachRegionToTemplate = foundry.utils.getProperty(document, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
+    let shouldDisable = document.sheet && !document.sheet.isEditable;
     return `
         <div class="form-group">
             <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
             <div class="form-fields">
                 <label class="checkbox" ${isTidy? 'style="width: 26ch;"' : ''}>
-                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${attachRegionToTemplate ? 'checked' : ''} ${game.system.id === 'pf2e' ? 'style="margin-top: -5px;"' : ''}>
+                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${shouldDisable ? 'disabled' : ''} ${attachRegionToTemplate ? 'checked' : ''} ${game.system.id === 'pf2e' ? 'style="margin-top: -5px;"' : ''}>
                     ${document instanceof MeasuredTemplateDocument ? game.i18n.localize('REGION-ATTACHER.AttachRegion') : game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
-                <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
+                <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM && !shouldDisable) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
                     <i class="fa fa-gear"></i>
                     ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
                 </button>

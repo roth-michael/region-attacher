@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.6.1
+- Fixed a bug where the "Attach Region" checkbox and "Configure Region" button were accessible in a locked compendium
+
 ## Version 1.6.0
 - Added compatibility with dnd5e v4.x
     - In 4.x, region attacher functionality is configured per-activity, not per-item; see the Activation tab, Targeting subtab when an area is selected
