@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.6.2
+- Fixed a bug in dnd5e where regions weren't properly created for consumabled which were destroyed by the time the measured template was placed
+
 ## Version 1.6.1
 - Fixed a bug where the "Attach Region" checkbox and "Configure Region" button were accessible in a locked compendium
 

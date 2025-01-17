@@ -5,41 +5,64 @@ export default function registerHooks() {
     let modifyingRegionFlags = {};
     let updateRegionFlags = {};
 
+    if (game.system.id === 'dnd5e') {
+        if (foundry.utils.isNewerVersion(game.system.version, '4')) {
+            Hooks.on('dnd5e.preCreateActivityTemplate', (activity, templateData) => {
+                let flags = foundry.utils.getProperty(activity.item, `flags.${CONSTANTS.MODULE_NAME}`);
+                if (flags) foundry.utils.setProperty(templateData, `flags.${CONSTANTS.MODULE_NAME}`, flags);
+            });
+        } else {
+            Hooks.on('dnd5e.preCreateItemTemplate', (item, templateData) => {
+                let flags = foundry.utils.getProperty(item, `flags.${CONSTANTS.MODULE_NAME}`);
+                if (flags) foundry.utils.setProperty(templateData, `flags.${CONSTANTS.MODULE_NAME}`, flags);
+            });
+        }
+    }
+
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
         let systemId = game.system.id;
         if (['dnd5e', 'pf2e'].includes(systemId)) {
-            let originItem;
-            let activity;
+            let flagDocument;
+            let actorUuid;
+            let activityUuid;
+            let activityId = '';
+            let originUuid;
             if (systemId === 'dnd5e') {
-                originItem = await fromUuid(templateDoc.getFlag('dnd5e', 'origin'));
-                if (originItem?.documentName === 'Activity') {
-                    activity = originItem;
-                    originItem = originItem.item;
+                flagDocument = templateDoc;
+                if (foundry.utils.isNewerVersion(game.system.version, '4')) {
+                    // Activity handling
+                    activityUuid = templateDoc.getFlag('dnd5e', 'origin');
+                    activityId = activityUuid?.split('.').at(-1);
+                    originUuid = templateDoc.getFlag('dnd5e', 'item');
+                } else {
+                    originUuid = templateDoc.getFlag('dnd5e', 'origin');
                 }
+                actorUuid = originUuid?.split('.').toSpliced(-2).join('.');
             } else if (systemId === 'pf2e') {
-                originItem = await fromUuid(templateDoc.getFlag('pf2e', 'origin.uuid'));
+                originUuid = templateDoc.getFlag('pf2e', 'origin.uuid');
+                flagDocument = await fromUuid(originUuid);
+                actorUuid = flagDocument?.actor?.uuid;
             }
-            if (!(originItem?.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE + (activity ? `.${activity.id}` : '')) ?? false)) {
+            if (!(flagDocument?.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE}.${activityId}`) ?? false)) {
                 await templateDoc.update({[getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true});
                 return;
             };
             let templateUpdates = {
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION + (activity ? `.${activity.id}` : '')),
-                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + (activity ? `.${activity.id}` : '')) || [],
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.ATTACHED_REGION}.${activityId}`),
+                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.REGION_BEHAVIORS}.${activityId}`) || [],
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true,
                 [getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true
             };
-            let region = await createDependentRegionForTemplate(templateDoc, originItem.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + (activity ? `.${activity.id}` : '')));
-            let actorUuid = originItem.actor?.uuid;
+            let region = await createDependentRegionForTemplate(templateDoc, flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.REGION_BEHAVIORS}.${activityId}`));
             let regionUpdates = {
                 'flags': {
                     [CONSTANTS.MODULE_NAME]: {
-                        [CONSTANTS.FLAGS.ITEM_UUID]: originItem.uuid
+                        [CONSTANTS.FLAGS.ITEM_UUID]: originUuid
                     }
                 }
             };
-            if (activity) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTIVITY_UUID] = activity.uuid;
+            if (activityUuid) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTIVITY_UUID] = activityUuid;
             if (actorUuid) regionUpdates.flags[CONSTANTS.MODULE_NAME][CONSTANTS.FLAGS.ACTOR_UUID] = actorUuid;
             await region.update(regionUpdates);
             await templateDoc.update(templateUpdates);
