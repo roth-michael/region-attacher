@@ -33,7 +33,7 @@ export default function registerHooks() {
                 if (foundry.utils.isNewerVersion(game.system.version, '4')) {
                     // Activity handling
                     activityUuid = templateDoc.getFlag('dnd5e', 'origin');
-                    activityId = activityUuid?.split('.').at(-1);
+                    activityId = `.${activityUuid?.split('.').at(-1)}`;
                     originUuid = templateDoc.getFlag('dnd5e', 'item');
                 } else {
                     originUuid = templateDoc.getFlag('dnd5e', 'origin');
@@ -44,17 +44,17 @@ export default function registerHooks() {
                 flagDocument = await fromUuid(originUuid);
                 actorUuid = flagDocument?.actor?.uuid;
             }
-            if (!(flagDocument?.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE}.${activityId}`) ?? false)) {
+            if (!(flagDocument?.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE}${activityId}`) ?? false)) {
                 await templateDoc.update({[getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true});
                 return;
             };
             let templateUpdates = {
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.ATTACHED_REGION}.${activityId}`),
-                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.REGION_BEHAVIORS}.${activityId}`) || [],
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: flagDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION + activityId),
+                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  flagDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + activityId) || [],
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true,
                 [getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true
             };
-            let region = await createDependentRegionForTemplate(templateDoc, flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.REGION_BEHAVIORS}.${activityId}`));
+            let region = await createDependentRegionForTemplate(templateDoc, flagDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + activityId));
             let regionUpdates = {
                 'flags': {
                     [CONSTANTS.MODULE_NAME]: {

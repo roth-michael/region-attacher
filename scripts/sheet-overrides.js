@@ -99,12 +99,19 @@ function patchActivitySheet(app, element) {
 // PF2e
 function patchPF2eItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
-    let areaTypeElem = html.find('select[name="system.area.type"]')?.[0];
-    if (!areaTypeElem?.value?.length) return;
-    let targetElem = areaTypeElem.parentNode.parentNode;
+    // For spells with area
+    let elementBefore = html.find('select[name="system.area.type"]')?.[0];
+    // Otherwise, for items with has inline template
+    if ( !elementBefore?.value?.length && item.system?.description?.value?.includes("@Template")) {
+        elementBefore = html.find('input[name="system.deathNote"]')?.[0];
+    }
+    if (!elementBefore?.value?.length) return;
+    let targetElem = elementBefore.parentNode.parentNode;
     if (!targetElem) return;
     $(getAttachRegionHtml(item)).insertAfter(targetElem);
-    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
+    html.find("#configureRegionButton")[0].onclick = () => {
+        openRegionConfig(item);
+    };
 }
 
 function patchTidyItemSheet(app, element, { item }) {
