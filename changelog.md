@@ -1,5 +1,9 @@
 # Region Attacher Changelog
 
+## Version 1.7.0
+- Added support for inline template links in pf2e (thanks Rowiz49!)
+- Fixed a pf2e bug introduced in 1.6.2 (thanks Rowiz49!)
+
 ## Version 1.6.2
 - Fixed a bug in dnd5e where regions weren't properly created for consumables which were destroyed by the time the measured template was placed
 

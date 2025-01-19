@@ -101,7 +101,8 @@ function patchPF2eItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
     // For spells with area
     let elementBefore = html.find('select[name="system.area.type"]')?.[0];
-    if ( !elementBefore?.value?.length && item.system?.description?.value?.includes("@Template")) { //Check if item has template inline
+    // Otherwise, for items with has inline template
+    if ( !elementBefore?.value?.length && item.system?.description?.value?.includes("@Template")) {
         elementBefore = html.find('input[name="system.deathNote"]')?.[0];
     }
     if (!elementBefore?.value?.length) return;

@@ -49,12 +49,12 @@ export default function registerHooks() {
                 return;
             };
             let templateUpdates = {
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.ATTACHED_REGION}${activityId}`),
-                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.REGION_BEHAVIORS}${activityId}`) || [],
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: flagDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION + activityId),
+                [getFullFlagPath(CONSTANTS.FLAGS.REGION_BEHAVIORS)]:  flagDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + activityId) || [],
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: true,
                 [getFullFlagPath(CONSTANTS.FLAGS.CREATION_COMPLETE)]: true
             };
-            let region = await createDependentRegionForTemplate(templateDoc, flagDocument.getFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.REGION_BEHAVIORS}${activityId}`));
+            let region = await createDependentRegionForTemplate(templateDoc, flagDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + activityId));
             let regionUpdates = {
                 'flags': {
                     [CONSTANTS.MODULE_NAME]: {
