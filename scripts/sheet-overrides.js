@@ -40,6 +40,22 @@ function getAttachRegionHtml(document, isTidy=false) {
     `
 }
 
+function getDetachRegionHtml(document) {
+    if (!game.user.isGM) return;
+    if (document.sheet && !document.sheet.isEditable) return;
+    return `
+        <div class="form-group">
+            <label></label><!-- Empty label so that the formatting lines up -->
+            <div class="form-fields">
+                <button id="detachRegionButton" style="flex: 1;" data-tooltip="REGION-ATTACHER.DetachRegionTooltip">
+                    <i class="fa fa-chain-broken"></i>
+                    ${game.i18n.localize('REGION-ATTACHER.DetachRegion')}
+                </button>
+            </div>
+        </div>
+    `
+}
+
 // dnd5e 3.x
 function patchItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
@@ -218,7 +234,17 @@ function patchMeasuredTemplateConfig(app, html, {document}) {
         let targetElem = html.find('button[type="submit"]')?.[0];
         if (!targetElem) return;
         $(getAttachRegionHtml(document)).insertBefore(targetElem);
+        if (app.object.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION)) {
+            $(getDetachRegionHtml(document)).insertBefore(targetElem);
+        }
         html.find('#configureRegionButton')[0].onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
+        html.find('#detachRegionButton')[0].onclick = async (event) => {
+            event.preventDefault();
+            await document.update({
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: "",
+                [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: false
+            });
+        };
         html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
             await document.update({
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
