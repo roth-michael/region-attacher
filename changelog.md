@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.8.0
+- Added support for SWADE system (4.4.0+) (thanks ddbrown30/TheChemist!)
+
 ## Version 1.7.0
 - Added support for inline template links in pf2e (thanks Rowiz49!)
 - Fixed a pf2e bug introduced in 1.6.2 (thanks Rowiz49!)
