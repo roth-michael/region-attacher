@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.9.0
+- Added improved PF2e support (thanks JamzTheMan!)
+
 ## Version 1.8.0
 - Added support for SWADE system (4.4.0+) (thanks ddbrown30/TheChemist!)
 
