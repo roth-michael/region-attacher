@@ -34,7 +34,7 @@ function getAttachRegionHtml(document, isTidy=false) {
                     <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)}" ${shouldDisable ? 'disabled' : ''} ${attachRegionToTemplate ? 'checked' : ''} ${game.system.id === 'pf2e' ? 'style="margin-top: -5px;"' : ''}>
                     ${document instanceof MeasuredTemplateDocument ? game.i18n.localize('REGION-ATTACHER.AttachRegion') : game.i18n.localize('REGION-ATTACHER.AttachRegionToTemplate')}
                 </label>
-                <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && isGM && !shouldDisable) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
+                <button id="configureRegionButton" style="flex: 1; white-space: nowrap;" ${(attachRegionToTemplate && isGM && !shouldDisable) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
                     <i class="fa fa-gear"></i>
                     ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
                 </button>
@@ -131,10 +131,7 @@ function patchPF2eItemSheet(app, html, { item }) {
         if (!elementFound) return;
         $(getAttachRegionHtml(item)).insertAfter(elementFound);
     }
-    if (!elementBefore?.value?.length) return;
-    let targetElem = elementBefore.parentNode.parentNode;
-    if (!targetElem) return;
-    $(getAttachRegionHtml(item)).insertAfter(targetElem);
+
     html.find("#configureRegionButton")[0].onclick = () => {
         openRegionConfig(item);
     };

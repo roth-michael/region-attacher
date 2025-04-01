@@ -1,0 +1,8 @@
+# foundry vtt
+foundry.js
+Thumbs.db
+
+node_modules/
+
+*.lock
+/.vscode
