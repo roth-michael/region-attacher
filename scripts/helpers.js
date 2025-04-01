@@ -74,3 +74,9 @@ export async function openRegionConfig(parentDocument, parentActivity) {
     let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true}));
     renderedConfig.element.querySelector('section.tab.region-behaviors').classList += ' active';
 }
+
+export function createElement(innerHTML) {
+    let template = document.createElement('template');
+    template.innerHTML = innerHTML;
+    return template.content.children[0];
+}

@@ -1,5 +1,5 @@
 import CONSTANTS from './constants.js';
-import { getFullFlagPath, openRegionConfig, getSetting } from './helpers.js';
+import { getFullFlagPath, openRegionConfig, getSetting, createElement } from './helpers.js';
 
 export function registerDnd5eSheetOverrides() {
     if (foundry.utils.isNewerVersion(4, game.system.version)) {
@@ -26,7 +26,7 @@ function getAttachRegionHtml(document, isTidy=false) {
     let isGM = game.user.isGM;
     let attachRegionToTemplate = foundry.utils.getProperty(document, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)) ?? false;
     let shouldDisable = document.sheet && !document.sheet.isEditable;
-    return `
+    return createElement(`
         <div class="form-group">
             <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
             <div class="form-fields">
@@ -40,28 +40,28 @@ function getAttachRegionHtml(document, isTidy=false) {
                 </button>
             </div>
         </div>
-    `
+    `);
 }
 
 // dnd5e 3.x
 function patchItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
     if (app.options.classes.includes('tidy5e-sheet')) return;
-    let targetTypeElem = html.find('select[name="system.target.type"]')?.[0];
+    html = html instanceof HTMLElement ? html : html[0];
+    let targetTypeElem = html.querySelector('select[name="system.target.type"]');
     if (!targetTypeElem) return;
     if (!Object.keys(CONFIG.DND5E.areaTargetTypes).includes(targetTypeElem.value)) return;
     let targetElem = targetTypeElem.parentNode.parentNode;
     if (!targetElem) return;
-    $(getAttachRegionHtml(item)).insertAfter(targetElem);
-    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
+    targetElem.after(getAttachRegionHtml(item));
+    html.querySelector('#configureRegionButton')?.addEventListener('click', () => {openRegionConfig(item)});
 }
 
 // dnd5e 4.x
-function patchActivitySheet(app, element) {
+function patchActivitySheet(app, html) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
     if (app.options.classes.includes('tidy5e-sheet')) return;
-    let html = $(element);
-    let templateTypeElem = html.find('select[name="target.template.type"]')?.[0];
+    let templateTypeElem = html.querySelector('select[name="target.template.type"]');
     if (!templateTypeElem?.value?.length) return;
     let targetElem = templateTypeElem.parentNode.parentNode;
     if (!targetElem) return;
@@ -83,172 +83,172 @@ function patchActivitySheet(app, element) {
         localize: true,
         input: attachCheckbox
     });
-    let configureButton = $(`
+    let configureButton = createElement(`
         <button id="configureRegionButton" style="flex: 1;" ${(attachRegionToTemplate && game.user.isGM) ? '' : 'disabled'} ${game.user.isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
             <i class="fa fa-gear"></i>
             ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
         </button>
-    `)[0];
-    configureButton.onclick = () => {openRegionConfig(app.item, app.activity)};
+    `);
+    configureButton.addEventListener('click', () => {openRegionConfig(app.item, app.activity)});
     let configureButtonGroup = foundry.applications.fields.createFormGroup({
         label: 'REGION-ATTACHER.RegionAttacher',
         localize: true,
         input: configureButton
     });
-    $(configureButtonGroup).insertAfter(targetElem);
-    $(attachCheckboxGroup).insertAfter(targetElem);
+    targetElem.after(configureButtonGroup);
+    targetElem.after(attachCheckboxGroup);
 }
 
 // PF2e
 function patchPF2eItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
 
-    let elementFound = html.find('select[name="system.area.type"]')?.[0];
+    html = html instanceof HTMLElement ? html : html[0];
+    let elementFound = html.querySelector('select[name="system.area.type"]');
+    let position;
     // For non-spell items with an inline @Template in the description
     if (!elementFound && item.system?.description?.value?.includes("@Template")) {
-        elementFound = html.find('fieldset.publication')?.[0];
+        elementFound = html.querySelector('fieldset.publication');
+        position = 'beforebegin';
         if (!elementFound) return;
-        $(getAttachRegionHtml(item)).insertBefore(elementFound);
     } else {
         // For spells, put it next to the Area input
         elementFound = elementFound?.parentNode?.parentNode;
+        position = 'afterend';
         if (!elementFound) return;
-        $(getAttachRegionHtml(item)).insertAfter(elementFound);
     }
 
-    html.find("#configureRegionButton")[0].onclick = () => {
-        openRegionConfig(item);
-    };
+    elementFound.insertAdjacentHTML(position, getAttachRegionHtml(item).outerHTML);
+
+    html.querySelector("#configureRegionButton").addEventListener('click', () => {openRegionConfig(item)});
 }
 
-function patchTidyItemSheet(app, element, { item }) {
+function patchTidyItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
-    let html = $(element);
-    let markupToInject = `
+    html = html instanceof HTMLElement ? html : html[0];
+    let injectElement = createElement(`
         <div style="display: contents;" data-tidy-render-scheme="handlebars">
             ${getAttachRegionHtml(item, true)}
         </div>
-    `
-    let targetTypeElem = html.find('select[data-tidy-field="system.target.type"]')?.[0];
+    `);
+    let targetTypeElem = html.querySelector('select[data-tidy-field="system.target.type"]');
     if (!targetTypeElem) return;
     if (!Object.keys(CONFIG.DND5E.areaTargetTypes).includes(targetTypeElem.value)) return;
     let targetElem = targetTypeElem.parentNode.parentNode;
     if (!targetElem) return;
-    $(markupToInject).insertAfter(targetElem);
-    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
+    targetElem.after(injectElement)
+    html.querySelector('#configureRegionButton').addEventListener('click', () => {openRegionConfig(item)});
 }
 
 // Swade
 function patchSwadeItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
+    html = html instanceof HTMLElement ? html : html[0];
     // Check if any of the template types are enabled
-    let templateSection = html.find('div[class="templates"]');
-    let inputs = templateSection.find("input");
-    let hasTemplate = false;
-    for (let input of inputs) {
-        if (input.checked) {
-            hasTemplate = true;
-            break;
-        }
-    }
+    let templateSection = html.querySelector('div[class="templates"]');
+    let inputs = templateSection?.querySelectorAll("input") ?? [];
+    let hasTemplate = [...inputs].some(i => i.checked);
+    if (!hasTemplate) return;
     //If we have a template, insert the attach region controls
-    if (hasTemplate) {
-        let fullFlag = getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE);
-        let attachRegionToTemplate = foundry.utils.getProperty(item, fullFlag) ?? false;
-        let attachCheckbox = foundry.applications.fields.createCheckboxInput({
-            name: getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE),
-            value: attachRegionToTemplate
-        });
-        attachCheckbox._onClick = async (event) => {
-            event.preventDefault();
-            await item.update({ [fullFlag]: !event.target.checked });
-        };
-        let attachCheckboxGroup = foundry.applications.fields.createFormGroup({
-            label: 'REGION-ATTACHER.AttachRegionToTemplate',
+    let fullFlag = getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE);
+    let attachRegionToTemplate = foundry.utils.getProperty(item, fullFlag) ?? false;
+    let attachCheckbox = foundry.applications.fields.createCheckboxInput({
+        name: getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE),
+        value: attachRegionToTemplate
+    });
+    attachCheckbox._onClick = async (event) => {
+        event.preventDefault();
+        await item.update({ [fullFlag]: !event.target.checked });
+    };
+    let attachCheckboxGroup = foundry.applications.fields.createFormGroup({
+        label: 'REGION-ATTACHER.AttachRegionToTemplate',
+        localize: true,
+        input: attachCheckbox
+    });
+    templateSection.after(attachCheckboxGroup);
+    //If attach is enabled, show the config button
+    if (attachRegionToTemplate && game.user.isGM) {
+        let configureButton = createElement(`
+            <button id="configureRegionButton" style="flex: 1;"'}>
+                <i class="fa fa-gear"></i>
+                ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
+            </button>
+        `);
+        configureButton.addEventListener('click', () => {openRegionConfig(app.item, app.activity)});
+        let configureButtonGroup = foundry.applications.fields.createFormGroup({
+            label: 'REGION-ATTACHER.RegionAttacher',
             localize: true,
-            input: attachCheckbox
+            input: configureButton
         });
-        $(attachCheckboxGroup).insertAfter(templateSection);
-        //If attach is enabled, show the config button
-        if (attachRegionToTemplate && game.user.isGM) {
-            let configureButton = $(`
-                <button id="configureRegionButton" style="flex: 1;"'}>
-                    <i class="fa fa-gear"></i>
-                    ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
-                </button>
-            `)[0];
-            configureButton.onclick = () => { openRegionConfig(app.item, app.activity); };
-            let configureButtonGroup = foundry.applications.fields.createFormGroup({
-                label: 'REGION-ATTACHER.RegionAttacher',
-                localize: true,
-                input: configureButton
-            });
-            $(configureButtonGroup).insertAfter(attachCheckboxGroup);
-        }
+        attachCheckboxGroup.after(configureButtonGroup);
     }
 }
-function getRegionTabHtml() {
-    return `
-        <a class="item" data-tab="region">
+function getRegionTabHtml(active=false) {
+    return createElement(`
+        <a ${active ? 'class="active" ' : ''}data-action="tab" data-group="sheet" data-tab="region">
             <i class="fas fa-chess-board"></i>
             ${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}
         </a>
-    `
+    `);
 }
 
-function getAttachRegionTabHtml(document) {
+function getAttachRegionTabHtml(document, active=false) {
     let isGM = game.user.isGM;
     let attachRegionToTile = foundry.utils.getProperty(document, getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)) ?? false;
-    return `
-        <div class="form-group">
-            <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
-            <div class="form-fields">
-                <label class="checkbox">
-                    <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)}" ${attachRegionToTile ? 'checked' : ''}>
-                    ${game.i18n.localize('REGION-ATTACHER.AttachRegionToTile')}
-                </label>
-                <button id="configureRegionButton" type="button" style="flex: 1;" ${(attachRegionToTile && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
-                    <i class="fa fa-gear"></i>
-                    ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
-                </button>
+    let v13 = game.release.generation > 12;
+    return createElement(`
+        <div class="tab${active ? ' active' : ''}" data-tab="region"${v13 ? ' data-group="sheet" data-application-part="region"' : ''}>
+            <div class="form-group">
+                <label>${game.i18n.localize('REGION-ATTACHER.RegionAttacher')}</label>
+                <div class="form-fields">
+                    <label class="checkbox">
+                        <input id="attachRegionCheckbox" type="checkbox" name="${getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)}" ${attachRegionToTile ? 'checked' : ''}>
+                        ${game.i18n.localize('REGION-ATTACHER.AttachRegionToTile')}
+                    </label>
+                    <button id="configureRegionButton" type="button" style="flex: 1;line-height: var(--input-height);" ${(attachRegionToTile && isGM) ? '' : 'disabled'} ${isGM ? '' : 'data-tooltip="REGION-ATTACHER.NonGMConfigureTooltip"'}>
+                        <i class="fa fa-gear"></i>
+                        ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
+                    </button>
+                </div>
             </div>
         </div>
-    `
+    `);
 }
 
 function patchTileConfig(app, html, {document}) {
     if (!game.user.isGM) return;
     // Don't show if the tile hasn't yet been created
     if (!document.id) return;
-    let firstTargetElem = html.find('nav.sheet-tabs > a.item[data-tab="animation"]')?.[0];
+    html = html instanceof HTMLElement ? html : html[0];
+    let existingSheet = html.querySelector('div.tab[data-application-part="region"]');
+    let active = existingSheet?.classList.contains('active');
+    if (existingSheet) existingSheet.remove();
+    let firstTargetElem = [...(html.querySelector('nav.sheet-tabs')?.children ?? [])].at(-1);
     if (!firstTargetElem) return;
-    $(getRegionTabHtml()).insertAfter(firstTargetElem);
-    let secondTargetElem = html.find('div.tab[data-tab="animation"]')?.[0];
+    firstTargetElem.after(getRegionTabHtml(active));
+    let secondTargetElem = [...html.querySelectorAll('section div.tab')].at(-1);
     if (!secondTargetElem) return;
-    $(`
-        <div class="tab" data-tab="region">
-            ${getAttachRegionTabHtml(document)}
-        </div>
-    `).insertAfter(secondTargetElem);
+    secondTargetElem.after(getAttachRegionTabHtml(document, active));
     if (document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)) {
         foundry.utils.setProperty(document, getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH), false);
-        html.find('nav>[data-tab="region"]')[0].click();
+        html.querySelector('nav>[data-tab="region"]').click();
         let closeElement;
-        if (html.is('form')) {
-            closeElement = html.parent().prev().find('.close')[0];
+        if (html.matches('form')) {
+            closeElement = html.querySelector('header button[data-action="close"]');
+            if (!closeElement) closeElement = html.parentNode.previousElementSibling?.querySelector('.close');
         } else {
-            closeElement = html.find('.close')[0];
+            closeElement = html.querySelector('.close');
         }
         let restoreNormalFunc = async () => {
-            document.update({
+            await document.update({
                 [getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)]: false
             });
         };
         closeElement.onclick = restoreNormalFunc;
-        html.find('button[type="submit"]')[0].onclick = restoreNormalFunc;
+        html.querySelector('button[type="submit"]').onclick = restoreNormalFunc;
     }
-    html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(document)};
-    html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
+    html.querySelector('#configureRegionButton').onclick = () => {openRegionConfig(document)};
+    html.querySelector('#attachRegionCheckbox').onclick = async (event) => {
         await document.update({
             [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)]: event.target.checked,
             [getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)]: true
@@ -258,24 +258,25 @@ function patchTileConfig(app, html, {document}) {
 
 function patchMeasuredTemplateConfig(app, html, {document}) {
     if (!game.user.isGM) return;
-    html.height('auto');
-    let tabs = html.find('nav');
+    html = html instanceof HTMLElement ? html : html[0];
+    html.style.height = 'auto';
+    let tabs = html.querySelectorAll('nav');
     if (tabs.length) {
-        let targetElem = tabs.next().children().last()?.[0];
+        let targetElem = [...(tabs.nextElementSibling?.children ?? [])].at(-1);
         if (!targetElem) return;
-        $(getAttachRegionHtml(document)).insertAfter(targetElem);
-        html.find('#configureRegionButton')[0].onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
-        html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
+        targetElem.after(getAttachRegionHtml(document));
+        html.querySelector('#configureRegionButton').onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
+        html.querySelector('#attachRegionCheckbox').onclick = async (event) => {
             await document.update({
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
             });
         }
     } else {
-        let targetElem = html.find('button[type="submit"]')?.[0];
+        let targetElem = [...html.querySelectorAll("section .form-group")].at(-1);
         if (!targetElem) return;
-        $(getAttachRegionHtml(document)).insertBefore(targetElem);
-        html.find('#configureRegionButton')[0].onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
-        html.find('#attachRegionCheckbox')[0].onclick = async (event) => {
+        targetElem.after(getAttachRegionHtml(document));
+        html.querySelector('#configureRegionButton').onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
+        html.querySelector('#attachRegionCheckbox').onclick = async (event) => {
             await document.update({
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
             });
