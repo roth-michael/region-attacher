@@ -103,14 +103,15 @@ function patchActivitySheet(app, element) {
 function patchPF2eItemSheet(app, html, { item }) {
     if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
 
-    // For items with an inline @Template in the description
-    if (item.system?.description?.value?.includes("@Template")) {
-        const elementFound = html.find('fieldset.publication')?.[0];
+    let elementFound = html.find('select[name="system.area.type"]')?.[0];
+    // For non-spell items with an inline @Template in the description
+    if (!elementFound && item.system?.description?.value?.includes("@Template")) {
+        elementFound = html.find('fieldset.publication')?.[0];
         if (!elementFound) return;
         $(getAttachRegionHtml(item)).insertBefore(elementFound);
     } else {
         // For spells, put it next to the Area input
-        const elementFound = html.find('select[name="system.area.type"]')?.[0]?.parentNode?.parentNode;
+        elementFound = elementFound?.parentNode?.parentNode;
         if (!elementFound) return;
         $(getAttachRegionHtml(item)).insertAfter(elementFound);
     }
