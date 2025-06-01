@@ -128,7 +128,7 @@ function patchTidyItemSheet(app, html, { item }) {
     html = html instanceof HTMLElement ? html : html[0];
     let injectElement = createElement(`
         <div style="display: contents;" data-tidy-render-scheme="handlebars">
-            ${getAttachRegionHtml(item, true)}
+            ${getAttachRegionHtml(item, true).outerHTML}
         </div>
     `);
     let targetTypeElem = html.querySelector('select[data-tidy-field="system.target.type"]');
