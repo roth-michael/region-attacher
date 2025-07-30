@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.9.1
+- Fixed a bug where region attacher controls didn't properly render with Tidy5e Sheets
+
 ## Version 1.9.0
 - Added improved PF2e support (thanks JamzTheMan!)
 - Removed all jQuery use
