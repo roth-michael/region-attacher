@@ -46,7 +46,7 @@ function getAttachRegionHtml(document, isTidy=false) {
 function getDetachRegionHtml(document) {
     if (!game.user.isGM) return;
     if (document.sheet && !document.sheet.isEditable) return;
-    return `
+    return createElement(`
         <div class="form-group">
             <label></label><!-- Empty label so that the formatting lines up -->
             <div class="form-fields">
@@ -56,6 +56,7 @@ function getDetachRegionHtml(document) {
                 </button>
             </div>
         </div>
+    `);
 }
 
 // dnd5e 3.x
@@ -290,7 +291,7 @@ function patchMeasuredTemplateConfig(app, html, {document}) {
         let targetElem = [...html.querySelectorAll("section .form-group")].at(-1);
         if (!targetElem) return;
         targetElem.after(getAttachRegionHtml(document));
-        if (app.object.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION)) {
+        if (document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION)) {
             targetElem.after(getDetachRegionHtml(document));
         }
         html.querySelector('#configureRegionButton').onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
