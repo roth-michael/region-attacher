@@ -1,6 +1,10 @@
 import CONSTANTS from './constants.js';
 
 export async function createDependentRegionForTemplate(templateDoc, specifiedBehaviors) {
+    if (!templateDoc.object.shape) {
+        //If we have no shape, we need to refresh it to create and configuring the shape correctly
+        templateDoc.object._refreshShape();
+    }
     let origShape = templateDoc.object.shape ?? templateDoc.object._computeShape();
     let points = origShape.points ?? origShape.toPolygon().points;
     let shape = {

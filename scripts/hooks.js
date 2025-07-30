@@ -22,7 +22,7 @@ export default function registerHooks() {
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
         let systemId = game.system.id;
-        if (['dnd5e', 'pf2e'].includes(systemId)) {
+        if (['dnd5e', 'pf2e', 'swade'].includes(systemId)) {
             let flagDocument;
             let actorUuid;
             let activityUuid;
@@ -41,6 +41,10 @@ export default function registerHooks() {
                 actorUuid = originUuid?.split('.').toSpliced(-2).join('.');
             } else if (systemId === 'pf2e') {
                 originUuid = templateDoc.getFlag('pf2e', 'origin.uuid');
+                flagDocument = await fromUuid(originUuid);
+                actorUuid = flagDocument?.actor?.uuid;
+            } else if (systemId === 'swade') {
+                originUuid = templateDoc.getFlag('swade', 'origin');
                 flagDocument = await fromUuid(originUuid);
                 actorUuid = flagDocument?.actor?.uuid;
             }

@@ -13,6 +13,9 @@ export function registerDnd5eSheetOverrides() {
 export function registerPF2eSheetOverrides() {
     Hooks.on('renderItemSheetPF2e', patchPF2eItemSheet);
 }
+export function registerSwadeSheetOverrides() {
+    Hooks.on('renderItemSheet', patchSwadeItemSheet);
+}
 
 export function registerSheetOverrides() {
     Hooks.on('renderTileConfig', patchTileConfig);
@@ -147,6 +150,55 @@ function patchTidyItemSheet(app, element, { item }) {
     html.find('#configureRegionButton')[0].onclick = () => {openRegionConfig(item)};
 }
 
+// Swade
+function patchSwadeItemSheet(app, html, { item }) {
+    if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
+    // Check if any of the template types are enabled
+    let templateSection = html.find('div[class="templates"]');
+    let inputs = templateSection.find("input");
+    let hasTemplate = false;
+    for (let input of inputs) {
+        if (input.checked) {
+            hasTemplate = true;
+            break;
+        }
+    }
+    //If we have a template, insert the attach region controls
+    if (hasTemplate) {
+        let fullFlag = getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE);
+        let attachRegionToTemplate = foundry.utils.getProperty(item, fullFlag) ?? false;
+        let attachCheckbox = foundry.applications.fields.createCheckboxInput({
+            name: getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE),
+            value: attachRegionToTemplate
+        });
+        attachCheckbox._onClick = async (event) => {
+            event.preventDefault();
+            await item.update({ [fullFlag]: !event.target.checked });
+        };
+        let attachCheckboxGroup = foundry.applications.fields.createFormGroup({
+            label: 'REGION-ATTACHER.AttachRegionToTemplate',
+            localize: true,
+            input: attachCheckbox
+        });
+        $(attachCheckboxGroup).insertAfter(templateSection);
+        //If attach is enabled, show the config button
+        if (attachRegionToTemplate && game.user.isGM) {
+            let configureButton = $(`
+                <button id="configureRegionButton" style="flex: 1;"'}>
+                    <i class="fa fa-gear"></i>
+                    ${game.i18n.localize('REGION-ATTACHER.ConfigureRegion')}
+                </button>
+            `)[0];
+            configureButton.onclick = () => { openRegionConfig(app.item, app.activity); };
+            let configureButtonGroup = foundry.applications.fields.createFormGroup({
+                label: 'REGION-ATTACHER.RegionAttacher',
+                localize: true,
+                input: configureButton
+            });
+            $(configureButtonGroup).insertAfter(attachCheckboxGroup);
+        }
+    }
+}
 function getRegionTabHtml() {
     return `
         <a class="item" data-tab="region">
