@@ -1,0 +1,20 @@
+{
+    "REGION-ATTACHER": {
+        "RegionAttacher": "Collega Regione",
+        "AttachRegion": "Collega Regione",
+        "AttachRegionToTemplate": "Collega Regione al Modello",
+        "AttachRegionToTile": "Collega Regione alla Casella",
+        "ConfigureRegion": "Configura Regione",
+        "NonGMConfigureTooltip": "Solo i GM possono configurare le Regioni della Scena",
+        "SETTINGS": {
+            "DEFAULT_REGION_VISIBILITY": {
+                "name": "Visibilità Predefinita della Regione",
+                "hint": "Permette di impostare la visibilità predefinita delle regioni della scena create dagli oggetti."
+            },
+            "SHOW_OPTIONS_TO_NON_GMS": {
+                "name": "Mostra Opzioni Oggetto ai non GM",
+                "hint": "Solo i GM e gli Assistenti GM possono modificare le regioni della scena. Se deselezionato, i giocatori potranno attivare o disattivare la creazione di regioni per i propri oggetti, ma non potranno modificarne il comportamento."
+            }
+        }
+    }
+}
