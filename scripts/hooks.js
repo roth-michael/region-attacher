@@ -147,6 +147,7 @@ export default function registerHooks() {
         } else if (region && !shouldHaveRegion) {
             await region.delete();
             await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE, false);
+            await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION, "");
         }
         delete modifyingRegionFlags[templateDoc.uuid];
     });

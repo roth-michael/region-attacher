@@ -263,7 +263,7 @@ function patchTileConfig(app, html, {document}) {
         closeElement.onclick = restoreNormalFunc;
         html.querySelector('button[type="submit"]').onclick = restoreNormalFunc;
     }
-    html.querySelector('#configureRegionButton').onclick = () => {openRegionConfig(document)};
+    html.querySelector('#configureRegionButton').addEventListener("click", () => {openRegionConfig(document)});
     html.querySelector('#attachRegionCheckbox').onclick = async (event) => {
         await document.update({
             [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TILE)]: event.target.checked,
@@ -281,7 +281,7 @@ function patchMeasuredTemplateConfig(app, html, {document}) {
         let targetElem = [...(tabs.nextElementSibling?.children ?? [])].at(-1);
         if (!targetElem) return;
         targetElem.after(getAttachRegionHtml(document));
-        html.querySelector('#configureRegionButton').onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
+        html.querySelector('#configureRegionButton').addEventListener("click", (event) => {event.preventDefault(); openRegionConfig(document)});
         html.querySelector('#attachRegionCheckbox').onclick = async (event) => {
             await document.update({
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
@@ -294,17 +294,22 @@ function patchMeasuredTemplateConfig(app, html, {document}) {
         if (document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION)) {
             targetElem.after(getDetachRegionHtml(document));
         }
-        html.querySelector('#configureRegionButton').onclick = (event) => {event.preventDefault(); openRegionConfig(document)};
-        html.querySelector('#detachRegionButton').onclick = async (event) => {
-            await document.update({
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: "",
-                [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: false
-            });
-        }
+        html.querySelector('#configureRegionButton').addEventListener("click", (event) => {event.preventDefault(); openRegionConfig(document)});
+        html.querySelector('#detachRegionButton')?.addEventListener("click", async () => {
+            const detachedRegion = fromUuidSync(document.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+            await Promise.all([
+                document.update({
+                    [getFullFlagPath(CONSTANTS.FLAGS.ATTACHED_REGION)]: "",
+                    [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: false
+                }),
+                detachedRegion.update({[`flags.-=${CONSTANTS.MODULE_NAME}`]: null})
+            ]);
+
+        });
         html.querySelector('#attachRegionCheckbox').onclick = async (event) => {
             await document.update({
                 [getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE)]: event.target.checked
             });
-        }
+        };
     }
 }
