@@ -2,6 +2,8 @@
 
 ## Version 1.10.0
 - Added the ability to "detach" a region from a template, leaving it on the map independent of the template (thanks ddbrown30/TheChemist!)
+- Added Italian localization (thanks GregoryWarn!)
+- Added Czech localization (thanks Lethrendis!)
 
 ## Version 1.9.1
 - Fixed a bug where region attacher controls didn't properly render with Tidy5e Sheets
