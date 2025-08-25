@@ -5,6 +5,8 @@
         "AttachRegionToTemplate": "Anexar Região ao Modelo",
         "AttachRegionToTile": "Anexar Região à Peça",
         "ConfigureRegion": "Configurar Região",
+        "DetachRegion": "Desanexar Região",
+        "DetachRegionTooltip": "Destaca a região atual do modelo sem destruí-la",
         "NonGMConfigureTooltip": "Apenas Mestres podem configurar Regiões de Cena",
         "SETTINGS": {
             "DEFAULT_REGION_VISIBILITY": {
@@ -19,3 +21,4 @@
     }
 
 }
+
