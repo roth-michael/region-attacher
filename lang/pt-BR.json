@@ -5,16 +5,17 @@
         "AttachRegionToTemplate": "Anexar Região ao Modelo",
         "AttachRegionToTile": "Anexar Região à Peça",
         "ConfigureRegion": "Configurar Região",
-        "NonGMConfigureTooltip": "Apenas MJs podem configurar Regiões de Cena",
+        "NonGMConfigureTooltip": "Apenas Mestres podem configurar Regiões de Cena",
         "SETTINGS": {
             "DEFAULT_REGION_VISIBILITY": {
                 "name": "Visibilidade Padrão de Região",
                 "hint": "Permite configurar a visibilidade padrão de itens criados em regiões de cena."
             },
             "SHOW_OPTIONS_TO_NON_GMS": {
-                "name": "Mostrar Configuração de Item para Não-MJs",
-                "hint": "Apenas MJs e Assistentes de Mestre podem modificar regiões de cena. Se desmarcado, jogadores poderão alternar a criação de regiões para seus itens, mas não podem configurar os comportamentos da região."
+                "name": "Mostrar Configuração de Item para Não-Mestres",
+                "hint": "Apenas Mestres e Assistentes de Mestre podem modificar regiões de cena. Se desmarcado, jogadores poderão alternar a criação de regiões para seus itens, mas não podem configurar os comportamentos da região."
             }
         }
     }
+
 }
