@@ -5,6 +5,8 @@
         "AttachRegionToTemplate": "Collega Regione al Modello",
         "AttachRegionToTile": "Collega Regione alla Casella",
         "ConfigureRegion": "Configura Regione",
+        "DetachRegion": "Scollega Regione",
+        "DetachRegionTooltip": "Scollega la regione corrente dal modello senza distruggerla",
         "NonGMConfigureTooltip": "Solo i GM possono configurare le Regioni della Scena",
         "SETTINGS": {
             "DEFAULT_REGION_VISIBILITY": {
