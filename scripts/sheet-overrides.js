@@ -1,6 +1,10 @@
 import CONSTANTS from './constants.js';
 import { getFullFlagPath, openRegionConfig, getSetting, createElement } from './helpers.js';
 
+export function registerDnd4eSheetOverrides() {
+    Hooks.on('renderItemSheet4e', patchDnd4eItemSheet);
+}
+
 export function registerDnd5eSheetOverrides() {
     if (foundry.utils.isNewerVersion(4, game.system.version)) {
         Hooks.on('renderItemSheet5e', patchItemSheet);
@@ -57,6 +61,18 @@ function getDetachRegionHtml(document) {
             </div>
         </div>
     `);
+}
+
+function patchDnd4eItemSheet(app, html, { item }) {
+    if (!game.user.isGM && !getSetting(CONSTANTS.SETTINGS.SHOW_OPTIONS_TO_NON_GMS)) return;
+    html = html instanceof HTMLElement ? html : html[0];
+    let targetTypeElem = html.querySelector('select[name="system.rangeType"]');
+    if (!targetTypeElem) return;
+    if (!Object.keys(CONFIG.DND4E.areaTargetTypes).includes(targetTypeElem.value)) return;
+    let targetElem = targetTypeElem.parentNode.parentNode;
+    if (!targetElem) return;
+    targetElem.after(getAttachRegionHtml(item));
+    html.querySelector('#configureRegionButton')?.addEventListener('click', () => {openRegionConfig(app.item)});
 }
 
 // dnd5e 3.x

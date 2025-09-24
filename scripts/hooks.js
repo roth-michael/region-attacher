@@ -22,13 +22,17 @@ export default function registerHooks() {
     Hooks.on('createMeasuredTemplate', async (templateDoc) => {
         if (!game.user.isGM) return;
         let systemId = game.system.id;
-        if (['dnd5e', 'pf2e', 'swade'].includes(systemId)) {
+        if (['dnd4e', 'dnd5e', 'pf2e', 'swade'].includes(systemId)) {
             let flagDocument;
             let actorUuid;
             let activityUuid;
             let activityId = '';
             let originUuid;
-            if (systemId === 'dnd5e') {
+            if (systemId === 'dnd4e') {
+                originUuid = templateDoc.getFlag('dnd4e', 'origin');
+                flagDocument = await fromUuid(originUuid);
+                actorUuid = flagDocument?.actor?.uuid;
+            } else if (systemId === 'dnd5e') {
                 flagDocument = templateDoc;
                 if (foundry.utils.isNewerVersion(game.system.version, '4')) {
                     // Activity handling
