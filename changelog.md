@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.11.0
+- Added support for dnd4e system (0.6.21+) (thanks SagaTympana!)
+
 ## Version 1.10.0
 - Added the ability to "detach" a region from a template, leaving it on the map independent of the template (thanks ddbrown30/TheChemist!)
 - Added Italian localization (thanks GregoryWarn!)
