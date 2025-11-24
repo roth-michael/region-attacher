@@ -1,5 +1,13 @@
 # Region Attacher Changelog
 
+## Version 2.0.0
+- With V14's wonderful changes to regions & templates, a large part of this module has become irrelevant!
+    - If you were using this module to manually attach regions to existing templates, you can safely uninstall it, as they are now one and the same
+    - If you were using this module to manually attach regions to tiles, you can continue to do so
+    - If you were using this module in one of the systems that allowed pre-configuration of a to-be-attached region, you can continue to do so (though it will now simply be configuring the to-be-created region)
+- Naturally, this version requires V14, and for system-specific behavior, versions of the systems which are V14-compatible
+- Removed the ability to "detach" a region from a template, as this is no longer a concept which makes sense
+
 ## Version 1.11.1
 - Czech localization update (Thanks Lethrendis!)
 

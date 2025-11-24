@@ -1,12 +1,12 @@
 {
   "id": "region-attacher",
   "title": "Region Attacher",
-  "description": "Allows attaching Scene Regions to templates on template creation",
+  "description": "Allows attaching Scene Regions to tiles, and pre-configuring region behaviors in certain systems",
   "version": "#{VERSION}#",
   "compatibility": {
-    "minimum": "12",
-    "verified": "13",
-    "maximum": "13"
+    "minimum": "14",
+    "verified": "14",
+    "maximum": "14"
   },
   "authors": [
     {
@@ -20,12 +20,7 @@
     "requires": []
   },
   "esmodules": [
-    "scripts/module.js",
-    "scripts/constants.js",
-    "scripts/helpers.js",
-    "scripts/hooks.js",
-    "scripts/sheet-overrides.js",
-    "scripts/settings.js"
+    "scripts/module.js"
   ],
   "styles": [
     "styles/module.css"
