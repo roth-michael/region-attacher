@@ -1,10 +1,12 @@
 {
     "REGION-ATTACHER": {
         "RegionAttacher": "Připojovač oblastí",
-        "AttachRegion": "Připojit oblast",
-        "AttachRegionToTemplate": "Připojit k šabloně oblast?",
-        "AttachRegionToTile": "Připojit oblast k dlaždici",
-        "ConfigureRegion": "Nastavení oblasti",
+        "AttachRegion": "Připojit oblast?",
+        "AttachRegionToTemplate": "Připojit k dlaždici oblast?",
+        "AttachRegionToTile": "Připojit k dlaždici oblast?",
+        "ConfigureRegion": "Nastavit oblast",
+        "DetachRegion": "Oddělit oblast",
+        "DetachRegionTooltip": "Oddělí aktuální oblast od šablony, aniž by ji to zničilo",
         "NonGMConfigureTooltip": "Oblasti scény může nastavovat pouze PJ",
         "SETTINGS": {
             "DEFAULT_REGION_VISIBILITY": {
@@ -13,7 +15,7 @@
             },
             "SHOW_OPTIONS_TO_NON_GMS": {
                 "name": "Zobrazit nastavení položky ne-PJům?",
-                "hint": "Oblasti scény mohou upravovat pouze PJ a asistenti PJ. Pokud není zaškrtnuto, hráči budou moci zapnout či vypnout vytváření oblastí svých položek, ale nebudou moci měnit jejich chování."
+                "hint": "Oblasti scény mohou upravovat pouze PJ a asistenti PJ. Po odškrtnutí budou hráči moci zapnout či vypnout vytváření oblastí svých položek, ale nebudou moci měnit jejich chování."
             }
         }
     }
