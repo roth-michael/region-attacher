@@ -1,5 +1,8 @@
 # Region Attacher Changelog
 
+## Version 1.11.1
+- Czech localization update (Thanks Lethrendis!)
+
 ## Version 1.11.0
 - Added support for dnd4e system (0.6.21+) (thanks SagaTympana!)
 
