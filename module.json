@@ -4,9 +4,9 @@
   "description": "Allows attaching Scene Regions to templates on template creation",
   "version": "#{VERSION}#",
   "compatibility": {
-    "minimum": "12",
-    "verified": "13",
-    "maximum": "13"
+    "minimum": "14",
+    "verified": "14",
+    "maximum": "14"
   },
   "authors": [
     {

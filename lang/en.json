@@ -5,8 +5,6 @@
         "AttachRegionToTemplate": "Attach Region to Template",
         "AttachRegionToTile": "Attach Region to Tile",
         "ConfigureRegion": "Configure Region",
-        "DetachRegion": "Detach Region",
-        "DetachRegionTooltip": "Detaches the current region from the template without destroying it",
         "NonGMConfigureTooltip": "Only GMs can configure Scene Regions",
         "SETTINGS": {
             "DEFAULT_REGION_VISIBILITY": {

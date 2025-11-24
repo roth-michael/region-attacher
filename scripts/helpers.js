@@ -1,29 +1,5 @@
 import CONSTANTS from './constants.js';
 
-export async function createDependentRegionForTemplate(templateDoc, specifiedBehaviors) {
-    if (!templateDoc.object.shape) {
-        //If we have no shape, we need to refresh it to create and configuring the shape correctly
-        templateDoc.object._refreshShape();
-    }
-    let origShape = templateDoc.object.shape ?? templateDoc.object._computeShape();
-    let points = origShape.points ?? origShape.toPolygon().points;
-    let shape = {
-        hole: false,
-        type: 'polygon',
-        points: points.map((pt, ind) => ind % 2 ? pt + templateDoc.y : pt + templateDoc.x)
-    }
-    let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
-        name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
-        shapes: [shape],
-        behaviors: specifiedBehaviors ?? templateDoc.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? [],
-        visibility: getSetting(CONSTANTS.SETTINGS.DEFAULT_REGION_VISIBILITY) ?? 0
-    }]);
-    let testRegion = testRegionArr[0]
-    await testRegion.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_TEMPLATE, templateDoc.uuid);
-    await templateDoc.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION, testRegion.uuid);
-    return testRegion;
-}
-
 export async function createDependentRegionForTile(tileDoc) {
     let shape = {
         hole: false,
@@ -32,7 +8,9 @@ export async function createDependentRegionForTile(tileDoc) {
         y: tileDoc.y,
         width: tileDoc.width,
         height: tileDoc.height,
-        rotation: tileDoc.rotation
+        rotation: tileDoc.rotation,
+        anchorX: 0.5,
+        anchorY: 0.5
     }
     let testRegionArr = await canvas.scene.createEmbeddedDocuments('Region', [{
         name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
@@ -58,21 +36,28 @@ export function getSetting(setting) {
     return game.settings.get(CONSTANTS.MODULE_NAME, setting);
 }
 
-export async function openRegionConfig(parentDocument, parentActivity) {
-    let region = await fromUuid(parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
-    if (parentDocument instanceof TileDocument || parentDocument instanceof MeasuredTemplateDocument) {
-        if (!region) return;
-    } else {
+export async function openRegionConfig(parentDocument) {
+    // let region = await fromUuid(parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ATTACHED_REGION));
+    // temp
+    let region = await fromUuid(parentDocument.flags?.[CONSTANTS.MODULE_NAME]?.[CONSTANTS.FLAGS.ATTACHED_REGION]);
+    if (!(parentDocument instanceof TileDocument)) {
+        if (!canvas.scene) return;
         region = (await canvas.scene.createEmbeddedDocuments('Region', [{
             name: RegionDocument.implementation.defaultName({parent: canvas.scene}),
             shapes: [],
-            behaviors: parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS + (parentActivity ? `.${parentActivity.id}` : '')) ?? []
+            // behaviors: parentDocument.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.REGION_BEHAVIORS) ?? []
+            // temp
+            behaviors: parentDocument.flags?.[CONSTANTS.MODULE_NAME]?.[CONSTANTS.FLAGS.REGION_BEHAVIORS] ?? [],
+            flags: {
+                [CONSTANTS.MODULE_NAME]: {
+                    [CONSTANTS.FLAGS.IS_CONFIG_REGION]: true,
+                    [CONSTANTS.FLAGS.ORIGIN]: parentDocument.uuid
+                }
+            }
         }]))[0];
-        await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.IS_CONFIG_REGION, true);
-        await region.setFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ORIGIN, (parentActivity ?? parentDocument).uuid);
     }
-    let renderedConfig = await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true}));
-    renderedConfig.element.querySelector('section.tab.region-behaviors').classList += ' active';
+    if (!region) return;
+    await (new foundry.applications.sheets.RegionConfig({document: region}).render({force: true}));
 }
 
 export function createElement(innerHTML) {

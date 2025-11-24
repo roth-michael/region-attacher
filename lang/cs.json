@@ -5,8 +5,6 @@
         "AttachRegionToTemplate": "Připojit k dlaždici oblast?",
         "AttachRegionToTile": "Připojit k dlaždici oblast?",
         "ConfigureRegion": "Nastavit oblast",
-        "DetachRegion": "Oddělit oblast",
-        "DetachRegionTooltip": "Oddělí aktuální oblast od šablony, aniž by ji to zničilo",
         "NonGMConfigureTooltip": "Oblasti scény může nastavovat pouze PJ",
         "SETTINGS": {
             "DEFAULT_REGION_VISIBILITY": {
