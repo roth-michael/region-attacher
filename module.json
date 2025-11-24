@@ -1,7 +1,7 @@
 {
   "id": "region-attacher",
   "title": "Region Attacher",
-  "description": "Allows attaching Scene Regions to templates on template creation",
+  "description": "Allows attaching Scene Regions to tiles, and pre-configuring region behaviors in certain systems",
   "version": "#{VERSION}#",
   "compatibility": {
     "minimum": "14",
