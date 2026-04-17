@@ -1,5 +1,9 @@
 # Region Attacher Changelog
 
+## Version 1.11.2
+- Fix for Region Attacher tab of tiles sometimes showing up empty
+- Fix for weird rendering in dnd5e 5.3.0+
+
 ## Version 1.11.1
 - Czech localization update (Thanks Lethrendis!)
 

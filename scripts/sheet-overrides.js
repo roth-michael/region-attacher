@@ -96,6 +96,7 @@ function patchActivitySheet(app, html) {
     let templateTypeElem = html.querySelector('select[name="target.template.type"]');
     if (!templateTypeElem?.value?.length) return;
     let targetElem = templateTypeElem.parentNode.parentNode;
+    if (foundry.utils.isNewerVersion(game.system.version, '5.3')) targetElem = targetElem?.parentNode?.parentNode;
     if (!targetElem) return;
     let fullFlag = getFullFlagPath(CONSTANTS.FLAGS.ATTACH_REGION_TO_TEMPLATE) + `.${app.activity.id}`;
     let attachRegionToTemplate = foundry.utils.getProperty(app.item, fullFlag) ?? false;
@@ -247,7 +248,7 @@ function getAttachRegionTabHtml(document, active=false) {
     `);
 }
 
-function patchTileConfig(app, html, {document}) {
+function patchTileConfig(app, html, {document, tabs}, {isFirstRender}) {
     if (!game.user.isGM) return;
     // Don't show if the tile hasn't yet been created
     if (!document.id) return;
@@ -286,6 +287,7 @@ function patchTileConfig(app, html, {document}) {
             [getFullFlagPath(CONSTANTS.FLAGS.JUST_TOGGLED_ATTACH)]: true
         });
     };
+    if (isFirstRender && !Object.values(tabs).some(t => t.active)) app.changeTab("position", "sheet");
 }
 
 function patchMeasuredTemplateConfig(app, html, {document}) {
